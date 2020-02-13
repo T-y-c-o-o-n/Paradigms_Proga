@@ -10,5 +10,4 @@ public interface CommonExpression extends TripleExpression {
 	String toMiniString();
 	String checkString(EnumSet<Oper> allowed);
 	int evaluate(int x, int y, int z) throws CalculationException ;
-	int getPriority();
 }

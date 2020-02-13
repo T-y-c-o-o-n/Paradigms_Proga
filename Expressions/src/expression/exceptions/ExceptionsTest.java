@@ -2,11 +2,7 @@ package expression.exceptions;
 
 import expression.TripleExpression;
 import expression.Variable;
-import expression.CheckedAdd;
-import expression.CheckedSubtract;
-import expression.CheckedMultiply;
-import expression.CheckedDivide;
-import expression.CheckedNegate;
+import expression.checked.*;
 import expression.parser.Either;
 import expression.parser.Parser;
 import expression.parser.ExpressionParser;

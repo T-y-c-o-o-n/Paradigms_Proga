@@ -1,5 +1,8 @@
-package expression;
+package expression.checked;
 
+import expression.AbstractUnarOper;
+import expression.CommonExpression;
+import expression.Oper;
 import expression.exceptions.OverflowException;
 
 public class CheckedNegate extends AbstractUnarOper {

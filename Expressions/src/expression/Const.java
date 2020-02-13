@@ -2,11 +2,10 @@ package expression;
 
 import java.util.EnumSet;
 
-public class Const extends AbstractValue implements CommonExpression {
+public class Const implements CommonExpression {
     private final Number val;
 
     public Const(Number val) {
-        super(Oper.CONST);
         this.val = val;
     }
 

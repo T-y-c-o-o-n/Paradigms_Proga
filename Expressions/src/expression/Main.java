@@ -1,5 +1,6 @@
 package expression;
 
+import expression.checked.CheckedPow;
 import expression.parser.*;
 
 public class Main {
@@ -11,9 +12,16 @@ public class Main {
 
 		Parser parser = new ExpressionParser();
 		System.out.println("PARSER:\n");
-		System.out.println(parser.parse("5 + y * 1").toString());
-		System.out.println(parser.parse("-5 + y * 1").toString());
-		System.out.println(parser.parse("5 + -y * 1").toString());
+		System.out.println(parser.parse("4 ** 3 ** 2").toString());
+		System.out.println(parser.parse("1 ** 10").toString());
+		System.out.println(parser.parse("2 ** 10").toString());
+		System.out.println(parser.parse("4 ** 3 ** 2").evaluate(0, 0, 0));
+		System.out.println(parser.parse("64 ** 2").evaluate(0, 0, 0));
+		System.out.println(parser.parse("1 ** 10").evaluate(0, 0, 0));
+		System.out.println(parser.parse("2 ** 10").evaluate(0, 0, 0));
+		System.out.println(parser.parse("5 ** 5") instanceof Const);
+		System.out.println(parser.parse("1 ** 10") instanceof CheckedPow);
+		System.out.println(parser.parse("10 // 2") instanceof Const);/*
 		System.out.println(parser.parse("5 + y * -1").toString());
 		System.out.println(parser.parse("5 / y - 1").toString());
 		System.out.println(parser.parse("-5 / y - 1").toString());
@@ -21,7 +29,7 @@ public class Main {
 		System.out.println(parser.parse("5 / y - -1").toString());
 		System.out.println(parser.parse("x - y + z").toString());
 		System.out.println(parser.parse("   x   *     z   ").toString());
-		/*System.out.println(parser.parse("x / y / z").toString());
+		System.out.println(parser.parse("x / y / z").toString());
 		System.out.println(parser.parse("x / y * z").toString());
 		System.out.println(parser.parse("x * y / z").toString());
 		System.out.println(parser.parse("x * y * z").toString());

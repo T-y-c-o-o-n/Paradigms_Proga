@@ -2,11 +2,10 @@ package expression;
 
 import java.util.EnumSet;
 
-public class Variable extends AbstractValue implements CommonExpression {
+public class Variable implements CommonExpression {
     private final String variable;
 
     public Variable(String variable) {
-        super(Oper.VAR);
         this.variable = variable;
     }
 

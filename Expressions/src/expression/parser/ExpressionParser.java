@@ -1,6 +1,7 @@
 package expression.parser;
 
 import expression.*;
+import expression.checked.*;
 import expression.exceptions.ParsingException;
 
 public class ExpressionParser implements Parser {
@@ -25,15 +26,11 @@ public class ExpressionParser implements Parser {
         private CommonExpression parse(int priority) {
             oper = Oper.NAN;
             skipWhitespace();
-            if (priority == 3) {
+            if (priority == 4) {
                 return parseUnarOper();
             }
             CommonExpression argLeft;
-            try {
-                argLeft = parse(priority + 1);
-            } catch (ParsingException e) {
-                throw new ParsingException("no first argument");
-            }
+            argLeft = parse(priority + 1);
             while (true) {
                 skipWhitespace();
                 if (oper == Oper.NAN) {
@@ -41,23 +38,31 @@ public class ExpressionParser implements Parser {
                         return argLeft;
                     } else if (testCloseBracket()) {
                         if (balance == 0) {
-                            throw new ParsingException("no opening bracket )");
+                            throw new ParsingException("no opening bracket");
                         }
                         return argLeft;
-                    } else if (test('+')) {
-                        oper = Oper.ADD;
-                    } else if (test('-')) {
-                        oper = Oper.SUB;
-                    } else if (test('*')) {
-                        oper = Oper.MUL;
-                    } else if (test('/')) {
-                        oper = Oper.DIV;
                     } else if (test('>')) {
                         expect('>');
                         oper = Oper.RSH;
                     } else if (test('<')) {
                         expect('<');
                         oper = Oper.LSH;
+                    } else if (test('+')) {
+                        oper = Oper.ADD;
+                    } else if (test('-')) {
+                        oper = Oper.SUB;
+                    } else if (test('*')) {
+                        if (test('*')) {
+                            oper = Oper.POW;
+                        } else {
+                            oper = Oper.MUL;
+                        }
+                    } else if (test('/')) {
+                        if (test('/')) {
+                            oper = Oper.LOG;
+                        } else {
+                            oper = Oper.DIV;
+                        }
                     } else {
                         throw new ParsingException("unexpected operation");
                     }
@@ -80,18 +85,22 @@ public class ExpressionParser implements Parser {
 
         private CommonExpression parseBinarOper(CommonExpression argLeft, Oper tempOper, CommonExpression argRight) {
             switch (tempOper) {
-                case ADD:
-                    return new Add(argLeft, argRight);
-                case SUB:
-                    return new Subtract(argLeft, argRight);
-                case MUL:
-                    return new Multiply(argLeft, argRight);
-                case DIV:
-                    return new Divide(argLeft, argRight);
                 case RSH:
                     return new RightShift(argLeft, argRight);
                 case LSH:
                     return new LeftShift(argLeft, argRight);
+                case ADD:
+                    return new CheckedAdd(argLeft, argRight);
+                case SUB:
+                    return new CheckedSubtract(argLeft, argRight);
+                case MUL:
+                    return new CheckedMultiply(argLeft, argRight);
+                case DIV:
+                    return new CheckedDivide(argLeft, argRight);
+                case POW:
+                    return new CheckedPow(argLeft, argRight);
+                case LOG:
+                    return new CheckedLog(argLeft, argRight);
                 default:
                     throw new ParsingException("unsupported operation");
             }
@@ -109,21 +118,21 @@ public class ExpressionParser implements Parser {
                 if (testDigit()) {
                     return parseConst(false);
                 } else {
-                    return new Negate(parse(3));
+                    return new CheckedNegate(parseUnarOper());
                 }
             }
             if (test('a')) {
                 expect("bs");
-                return new Abs(parse(3));
+                return new Abs(parseUnarOper());
             } else if (test('s')) {
                     expect("quare");
-                    return new Square(parse(3));
+                    return new Square(parseUnarOper());
             } else if (test('r')) {
                     expect("everse");
-                    return new Reverse(parse(3));
+                    return new Reverse(parseUnarOper());
             } else if (test('d')) {
                     expect("igits");
-                    return new Digits(parse(3));
+                    return new Digits(parseUnarOper());
             } else if (test('(')) {
                     balance++;
                     CommonExpression parsed = parse(0);
@@ -144,6 +153,10 @@ public class ExpressionParser implements Parser {
             do {
                 sb.append(getChar());
             } while (testDigit());
+            skipWhitespace();
+            if (testDigit()) {
+                throw new ParsingException("Spaces in number");
+            }
             int val = Integer.parseInt(sb.toString());
             return new Const(val);
         }

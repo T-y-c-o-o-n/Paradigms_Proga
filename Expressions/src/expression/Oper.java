@@ -51,12 +51,28 @@ public enum Oper {
             return 2;
         }
     },
+    POW {
+        public String toString() {
+            return " ** ";
+        }
+        public int getPriority() {
+            return 3;
+        }
+    },
+    LOG {
+        public String toString() {
+            return " // ";
+        }
+        public int getPriority() {
+            return 3;
+        }
+    },
     NEG {
         public String toString() {
             return " -";
         }
         public int getPriority() {
-            return 3;
+            return 4;
         }
     },
     ABS {
@@ -64,7 +80,7 @@ public enum Oper {
             return "abs ";
         }
         public int getPriority() {
-            return 3;
+            return 4;
         }
     },
     SQR {
@@ -72,7 +88,7 @@ public enum Oper {
             return "square ";
         }
         public int getPriority() {
-            return 3;
+            return 4;
         }
     },
     DIG {
@@ -80,7 +96,7 @@ public enum Oper {
             return "digits ";
         }
         public int getPriority() {
-            return 3;
+            return 4;
         }
     },
     REV {
@@ -88,7 +104,7 @@ public enum Oper {
             return "reverse ";
         }
         public int getPriority() {
-            return 3;
+            return 4;
         }
     },
     VAR {
@@ -96,7 +112,7 @@ public enum Oper {
             return " var ";
         }
         public int getPriority() {
-            return 3;
+            return 4;
         }
     },
     CONST {
@@ -104,7 +120,7 @@ public enum Oper {
             return " const ";
         }
         public int getPriority() {
-            return 3;
+            return 4;
         }
     },
     NAN {
@@ -115,7 +131,6 @@ public enum Oper {
             return -1;
         }
     };
-
     
     public abstract int getPriority();
 }
