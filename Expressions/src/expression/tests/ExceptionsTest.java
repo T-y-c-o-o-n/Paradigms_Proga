@@ -1,4 +1,4 @@
-package expression.exceptions;
+package expression.tests;
 
 import expression.TripleExpression;
 import expression.Variable;
@@ -6,10 +6,8 @@ import expression.binary.CheckedAdd;
 import expression.binary.CheckedDivide;
 import expression.binary.CheckedMultiply;
 import expression.binary.CheckedSubtract;
-import expression.parser.Either;
 import expression.parser.Parser;
 import expression.parser.ExpressionParser;
-import expression.parser.ParserTest;
 import expression.unary.CheckedNegate;
 
 import java.util.ArrayList;

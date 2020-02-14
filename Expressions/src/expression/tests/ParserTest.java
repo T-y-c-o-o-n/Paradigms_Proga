@@ -1,8 +1,8 @@
-package expression.parser;
+package expression.tests;
 
-import expression.BaseTest;
 import expression.CommonExpression;
 import expression.TripleExpression;
+import expression.parser.ExpressionParser;
 
 import java.util.ArrayList;
 import java.util.List;
