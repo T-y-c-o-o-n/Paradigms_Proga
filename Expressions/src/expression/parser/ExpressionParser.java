@@ -2,7 +2,7 @@ package expression.parser;
 
 import expression.*;
 import expression.binary.*;
-import expression.exceptions.ParsingConstException;
+import expression.exceptions.ConstException;
 import expression.exceptions.ParsingException;
 import expression.unary.*;
 
@@ -152,13 +152,13 @@ public class ExpressionParser implements Parser {
             } while (isDigit());
             skipWhitespace();
             if (isDigit()) {
-                throw new ParsingConstException("Spaces in number");
+                throw new ConstException("Spaces in number");
             }
             int val;
             try {
                 val = Integer.parseInt(sb.toString());
             } catch (NumberFormatException e) {
-                throw new ParsingConstException("overflow " + e.getMessage());
+                throw new ConstException("overflow " + e.getMessage());
             }
             return new Const(val);
         }
