@@ -167,5 +167,6 @@ public class ExpressionParser implements Parser {
             String var = String.valueOf(getChar());
             return new Variable(var);
         }
+
     }
 }
