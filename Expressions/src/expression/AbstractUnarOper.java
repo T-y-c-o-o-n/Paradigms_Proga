@@ -20,18 +20,13 @@ public abstract class AbstractUnarOper implements CommonExpression {
         return arg;
     }
 
-    public int getPriority() {
-        return me.getPriority();
-    }
-
     public Oper getOper() {
         return me;
     }
 
     public String toString() {
-        return "(" + me +
-                arg.toString() +
-                ")";
+        return me +
+                arg.toString();
     }
 
     public String toMiniString() {
@@ -39,8 +34,14 @@ public abstract class AbstractUnarOper implements CommonExpression {
                 arg.toMiniString();
     }
 
+    public abstract int calculate(int a);
+
+    public int evaluate(int x, int y, int z) {
+        return calculate(arg.evaluate(x, y, z));
+    }
+
     public String checkString(EnumSet<Oper> allowed) {
-        return toString();
+        return toMiniString();
     }
 
     public boolean equals(Object object) {

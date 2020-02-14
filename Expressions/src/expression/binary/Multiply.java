@@ -1,5 +1,8 @@
-package expression;
+package expression.binary;
 
+import expression.AbstractBinarOper;
+import expression.CommonExpression;
+import expression.Oper;
 import expression.exceptions.CalculationException;
 
 import java.util.EnumSet;
@@ -13,8 +16,8 @@ public class Multiply extends AbstractBinarOper {
     	super(first, second, Oper.MUL);
     }
 
-    public int evaluate(int x, int y, int z) {
-        return arg1.evaluate(x, y, z) * arg2.evaluate(x, y, z);
+    public int calculate(int a, int b) {
+        return a * b;
     }
 
     public String toMiniString() {

@@ -1,6 +1,5 @@
 package expression.parser;
 
-import expression.Oper;
 import expression.exceptions.ParsingException;
 
 public abstract class BaseParser {
@@ -48,13 +47,15 @@ public abstract class BaseParser {
         }
     }
 
-    protected boolean testCloseBracket() { return tempCh == ')'; }
+    protected boolean isLetter() { return 'a' <= tempCh && tempCh <= 'z'; }
 
-    protected boolean testDigit() {
+    protected boolean isDigit() {
         return '0' <= tempCh && tempCh <= '9';
     }
 
-    protected boolean testVariable() {
+    protected boolean isVariable() {
         return 'x' <= tempCh && tempCh <= 'z';
     }
+
+    protected boolean isCloseBracket() { return tempCh == ')'; }
 }

@@ -1,6 +1,6 @@
 package expression;
 
-import expression.checked.CheckedPow;
+import expression.binary.CheckedPow;
 import expression.parser.*;
 
 public class Main {
@@ -12,7 +12,10 @@ public class Main {
 
 		Parser parser = new ExpressionParser();
 		System.out.println("PARSER:\n");
-		System.out.println(parser.parse("4 ** 3 ** 2").toString());
+		System.out.println(parser.parse("log2 (22323)").toString());
+		System.out.println(parser.parse("log2 4").toString());
+		System.out.println(parser.parse("log2 8").toString());
+		System.out.println(parser.parse("log2 16").toString());
 		System.out.println(parser.parse("1 ** 10").toString());
 		System.out.println(parser.parse("2 ** 10").toString());
 		System.out.println(parser.parse("4 ** 3 ** 2").evaluate(0, 0, 0));

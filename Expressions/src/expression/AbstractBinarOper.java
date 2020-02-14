@@ -21,12 +21,14 @@ public abstract class AbstractBinarOper implements CommonExpression {
 		return arg2;
 	}
 
-	public int getPriority() {
-		return me.getPriority();
-	}
-
 	public Oper getOper() {
 		return me;
+	}
+
+	public abstract int calculate(int a, int b);
+
+	public int evaluate(int x, int y, int z) {
+		return calculate(arg1.evaluate(x, y, z), arg2.evaluate(x, y, z));
 	}
 
 	public String toString() {

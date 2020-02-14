@@ -1,8 +1,10 @@
 package expression.parser;
 
 import expression.*;
-import expression.checked.*;
+import expression.binary.*;
+import expression.exceptions.ParsingConstException;
 import expression.exceptions.ParsingException;
+import expression.unary.*;
 
 public class ExpressionParser implements Parser {
     public CommonExpression parse(Source source) {
@@ -15,7 +17,7 @@ public class ExpressionParser implements Parser {
 
     private static class ExpressionParser1 extends BaseParser {
         private int balance = 0;
-        private Oper oper;
+        public Oper oper;
 
         public ExpressionParser1(Source source) {
             super(source);
@@ -36,7 +38,7 @@ public class ExpressionParser implements Parser {
                 if (oper == Oper.NAN) {
                     if (test('\0')) {
                         return argLeft;
-                    } else if (testCloseBracket()) {
+                    } else if (isCloseBracket()) {
                         if (balance == 0) {
                             throw new ParsingException("no opening bracket");
                         }
@@ -64,21 +66,20 @@ public class ExpressionParser implements Parser {
                             oper = Oper.DIV;
                         }
                     } else {
-                        throw new ParsingException("unexpected operation");
+                        throw new ParsingException("unexpected binary operation");
                     }
                 }
                 if (oper.getPriority() != priority) {
                     return argLeft;
                 }
                 Oper savedOper = oper;
-
                 CommonExpression argRight;
                 oper = Oper.NAN;
-                try {
+                //try {
                     argRight = parse(priority + 1);
-                } catch (ParsingException e) {
-                    throw new ParsingException("no second argument");
-                }
+                //} catch (ParsingException e) {
+                //    throw new ParsingException("no second argument");
+                //}
                 argLeft = parseBinarOper(argLeft, savedOper, argRight);
             }
         }
@@ -107,42 +108,38 @@ public class ExpressionParser implements Parser {
         }
 
         private CommonExpression parseUnarOper() {
-            if (testDigit()) {
+            skipWhitespace();
+            if (isDigit()) {
                 return parseConst(true);
             }
-            if (testVariable()) {
+            if (isVariable()) {
                 return parseVar();
             }
             if (test('-')) {
                 skipWhitespace();
-                if (testDigit()) {
+                if (isDigit()) {
                     return parseConst(false);
                 } else {
                     return new CheckedNegate(parseUnarOper());
                 }
             }
-            if (test('a')) {
-                expect("bs");
-                return new Abs(parseUnarOper());
-            } else if (test('s')) {
-                    expect("quare");
-                    return new Square(parseUnarOper());
-            } else if (test('r')) {
-                    expect("everse");
-                    return new Reverse(parseUnarOper());
-            } else if (test('d')) {
-                    expect("igits");
-                    return new Digits(parseUnarOper());
-            } else if (test('(')) {
-                    balance++;
-                    CommonExpression parsed = parse(0);
-                    skipWhitespace();
-                    expect(')');
-                    balance--;
-                    return parsed;
-            } else {
-                throw new ParsingException("no argument");
+            if (test('(')) {
+                balance++;
+                CommonExpression parsed = parse(0);
+                skipWhitespace();
+                expect(')');
+                balance--;
+                return parsed;
             }
+            StringBuilder sb = new StringBuilder();
+            while (isLetter() || isDigit()) {
+                sb.append(getChar());
+            }
+            skipWhitespace();
+            if (Oper.getUnarOper.get(sb.toString()) != null) {
+                return Oper.getUnarExp(sb.toString(), parseUnarOper());
+            }
+            throw new ParsingException("expected const, variable or unary operation");
         }
 
         private CommonExpression parseConst(boolean positive) {
@@ -152,12 +149,17 @@ public class ExpressionParser implements Parser {
             }
             do {
                 sb.append(getChar());
-            } while (testDigit());
+            } while (isDigit());
             skipWhitespace();
-            if (testDigit()) {
-                throw new ParsingException("Spaces in number");
+            if (isDigit()) {
+                throw new ParsingConstException("Spaces in number");
             }
-            int val = Integer.parseInt(sb.toString());
+            int val;
+            try {
+                val = Integer.parseInt(sb.toString());
+            } catch (NumberFormatException e) {
+                throw new ParsingConstException("overflow " + e.getMessage());
+            }
             return new Const(val);
         }
 

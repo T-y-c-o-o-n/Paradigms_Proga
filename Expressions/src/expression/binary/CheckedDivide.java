@@ -1,4 +1,4 @@
-package expression.checked;
+package expression.binary;
 
 import expression.AbstractBinarOper;
 import expression.CommonExpression;
@@ -16,8 +16,7 @@ public class CheckedDivide extends AbstractBinarOper {
         super(first, second, Oper.DIV);
     }
 
-    public int evaluate(int x, int y, int z) {
-        int a = arg1.evaluate(x, y, z), b = arg2.evaluate(x, y, z);
+    public int calculate(int a, int b) {
         if (a == Integer.MIN_VALUE && b == -1) {
             throw new OverflowException("");
         }

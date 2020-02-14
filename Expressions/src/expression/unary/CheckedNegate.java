@@ -1,4 +1,4 @@
-package expression.checked;
+package expression.unary;
 
 import expression.AbstractUnarOper;
 import expression.CommonExpression;
@@ -10,8 +10,7 @@ public class CheckedNegate extends AbstractUnarOper {
         super(arg, Oper.NEG);
     }
 
-    public int evaluate(int x, int y, int z) {
-        int a = arg.evaluate(x, y, z);
+    public int calculate(int a) {
         if (a == Integer.MIN_VALUE) {
             throw new OverflowException("");
         }

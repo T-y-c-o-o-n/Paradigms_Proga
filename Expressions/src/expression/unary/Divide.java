@@ -1,4 +1,8 @@
-package expression;
+package expression.unary;
+
+import expression.AbstractBinarOper;
+import expression.CommonExpression;
+import expression.Oper;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -11,8 +15,8 @@ public class Divide extends AbstractBinarOper {
     	super(first, second, Oper.DIV);
     }
 
-    public int evaluate(int x, int y, int z) {
-    	return arg1.evaluate(x, y, z) / arg2.evaluate(x, y, z);
+    public int calculate(int a, int b) {
+    	return a / b;
     }
 
     public String toMiniString() {

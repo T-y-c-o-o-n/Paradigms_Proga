@@ -1,4 +1,4 @@
-package expression.checked;
+package expression.binary;
 
 import expression.AbstractBinarOper;
 import expression.CommonExpression;
@@ -14,11 +14,10 @@ public class CheckedLog extends AbstractBinarOper {
     private static final EnumSet<Oper> secondArgsToAllow = EnumSet.noneOf(Oper.class);
 
     public CheckedLog(CommonExpression first, CommonExpression second) {
-        super(first, second, Oper.DIV);
+        super(first, second, Oper.LOG);
     }
 
-    public int evaluate(int x, int y, int z) {
-        int b = arg1.evaluate(x, y, z), a = arg2.evaluate(x, y, z);
+    public int calculate(int b, int a) {
         if (a <= 1 || b <= 0) {
             throw new LogArgumentsException("");
         }

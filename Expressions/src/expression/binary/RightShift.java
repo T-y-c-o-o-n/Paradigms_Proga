@@ -1,4 +1,8 @@
-package expression;
+package expression.binary;
+
+import expression.AbstractBinarOper;
+import expression.CommonExpression;
+import expression.Oper;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -11,8 +15,8 @@ public class RightShift extends AbstractBinarOper {
         super(first, second, Oper.RSH);
     }
 
-    public int evaluate(int x, int y, int z) {
-        return arg1.evaluate(x, y, z) >> arg2.evaluate(x, y, z);
+    public int calculate(int a, int b) {
+        return a >> b;
     }
 
     public String toMiniString() {

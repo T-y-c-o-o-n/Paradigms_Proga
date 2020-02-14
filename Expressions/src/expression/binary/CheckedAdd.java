@@ -1,4 +1,4 @@
-package expression.checked;
+package expression.binary;
 
 import java.util.EnumSet;
 
@@ -15,8 +15,7 @@ public class CheckedAdd extends AbstractBinarOper {
         super(first, second, Oper.ADD);
     }
 
-    public int evaluate(int x, int y, int z) {
-        int a = arg1.evaluate(x, y, z), b = arg2.evaluate(x, y, z);
+    public int calculate(int a, int b) {
         int res = a + b;
         if (a < 0 && b < 0 && res >= 0 || a > 0 && b > 0 && res <= 0) {
             throw new OverflowException("");

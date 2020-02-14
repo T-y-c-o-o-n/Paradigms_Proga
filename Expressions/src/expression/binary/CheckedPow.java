@@ -1,10 +1,9 @@
-package expression.checked;
+package expression.binary;
 
 import expression.AbstractBinarOper;
 import expression.CommonExpression;
-import expression.Const;
 import expression.Oper;
-import expression.checked.CheckedMultiply;
+import expression.binary.CheckedMultiply;
 import expression.exceptions.PowArgumentsException;
 
 import java.util.EnumSet;
@@ -17,8 +16,7 @@ public class CheckedPow extends AbstractBinarOper {
         super(first, second, Oper.POW);
     }
 
-    public int evaluate(int x, int y, int z) {
-        int a = arg1.evaluate(x, y, z), n = arg2.evaluate(x, y, z);
+    public int calculate(int a, int n) {
         if (a == 0 && n == 0 || n < 0) {
             throw new PowArgumentsException("");
         }
@@ -31,10 +29,10 @@ public class CheckedPow extends AbstractBinarOper {
         int res = 1;
         while (n > 0) {
             if (n % 2 == 1) {
-                res = new CheckedMultiply(new Const(res), new Const(a)).evaluate(x, y, z);  // overflow
+                res = new CheckedMultiply(null, null).calculate(res, a);  // overflow
                 n--;
             } else {
-                a = new CheckedMultiply(new Const(a), new Const(a)).evaluate(x, y, z);  // overflow
+                a = new CheckedMultiply(null, null).calculate(a, a);  // overflow
                 n /= 2;
             }
         }

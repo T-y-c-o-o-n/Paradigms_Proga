@@ -1,4 +1,4 @@
-package expression.checked;
+package expression.binary;
 
 import expression.AbstractBinarOper;
 import expression.CommonExpression;
@@ -15,8 +15,7 @@ public class CheckedMultiply extends AbstractBinarOper {
         super(first, second, Oper.MUL);
     }
 
-    public int evaluate(int x, int y, int z) {
-        int a = arg1.evaluate(x, y, z), b = arg2.evaluate(x, y, z);
+    public int calculate(int a, int b) {
         int res = a * b;
         /*int absA = a >= 0 ? a : -a;
         int absB = b >= 0 ? b : -b;
