@@ -16,11 +16,10 @@ public class CheckedAdd extends AbstractBinarOper {
     }
 
     public int calculate(int a, int b) {
-        int res = a + b;
-        if (a < 0 && b < 0 && res >= 0 || a > 0 && b > 0 && res <= 0) {
+        if (a < 0 && b < 0 && (Integer.MIN_VALUE - b > a) || a > 0 && b > 0 && (Integer.MAX_VALUE - b < a)) {
             throw new OverflowException("");
         }
-        return res;
+        return a + b;
     }
 
     public String toMiniString() {

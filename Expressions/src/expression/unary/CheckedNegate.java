@@ -12,7 +12,7 @@ public class CheckedNegate extends AbstractUnarOper {
 
     public int calculate(int a) {
         if (a == Integer.MIN_VALUE) {
-            throw new OverflowException("");
+            throw new OverflowException("2147483648");
         }
         return -a;
     }

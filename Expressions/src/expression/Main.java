@@ -4,11 +4,11 @@ import expression.binary.CheckedPow;
 import expression.parser.*;
 
 public class Main {
-	public static void main(String[] args) {/*
+	public static void main(String[] args) {
 		int z=-1538579178;
 		System.out.println(Math.abs(-7));
-		System.out.println(new Digits(new Const(Integer.MIN_VALUE)).evaluate(1, 1, 1));
-		System.out.println(Integer.MIN_VALUE);*/
+		//System.out.println(new Digits(new Const(Integer.MIN_VALUE)).evaluate(1, 1, 1));
+		System.out.println(Integer.MIN_VALUE);
 
 		Parser parser = new ExpressionParser();
 		System.out.println("PARSER:\n");
