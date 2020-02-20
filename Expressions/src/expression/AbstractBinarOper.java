@@ -1,5 +1,7 @@
 package expression;
 
+import expression.exceptions.OverflowException;
+
 import java.util.EnumSet;
 
 public abstract class AbstractBinarOper implements CommonExpression {
@@ -29,6 +31,10 @@ public abstract class AbstractBinarOper implements CommonExpression {
 
 	public int evaluate(int x, int y, int z) {
 		return calculate(arg1.evaluate(x, y, z), arg2.evaluate(x, y, z));
+	}
+
+	protected void overflow(Integer a, Integer b) {
+		throw new OverflowException(a.toString() + me + b.toString());
 	}
 
 	public String toString() {

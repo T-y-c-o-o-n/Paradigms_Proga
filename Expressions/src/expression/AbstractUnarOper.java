@@ -1,7 +1,8 @@
 package expression;
 
+import expression.exceptions.OverflowException;
+
 import java.util.EnumSet;
-import java.util.List;
 
 public abstract class AbstractUnarOper implements CommonExpression {
     protected CommonExpression arg;
@@ -38,6 +39,10 @@ public abstract class AbstractUnarOper implements CommonExpression {
 
     public int evaluate(int x, int y, int z) {
         return calculate(arg.evaluate(x, y, z));
+    }
+
+    protected void overflow(Integer a) {
+        throw new OverflowException(me + a.toString());
     }
 
     public String checkString(EnumSet<Oper> allowed) {

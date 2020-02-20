@@ -16,8 +16,8 @@ public class CheckedAdd extends AbstractBinarOper {
     }
 
     public int calculate(int a, int b) {
-        if (a < 0 && b < 0 && (Integer.MIN_VALUE - b > a) || a > 0 && b > 0 && (Integer.MAX_VALUE - b < a)) {
-            throw new OverflowException("");
+        if ((a < 0) && (b < 0) && (Integer.MIN_VALUE - b > a) || (a > 0) && (b > 0) && (Integer.MAX_VALUE - b < a)) {
+            overflow(a, b);
         }
         return a + b;
     }

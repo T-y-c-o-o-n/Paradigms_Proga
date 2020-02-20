@@ -29,10 +29,16 @@ public class CheckedPow extends AbstractBinarOper {
         int res = 1;
         while (n > 0) {
             if (n % 2 == 1) {
-                res = new CheckedMultiply(null, null).calculate(res, a);  // overflow
+                if (!CheckedMultiply.check(res, a)) {
+                    overflow(a, n);
+                }
+                res *= a;  // overflow
                 n--;
             } else {
-                a = new CheckedMultiply(null, null).calculate(a, a);  // overflow
+                if (!CheckedMultiply.check(a, a)) {
+                    overflow(a, n);
+                }
+                a *= a;  // overflow
                 n /= 2;
             }
         }

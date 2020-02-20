@@ -15,18 +15,37 @@ public class CheckedMultiply extends AbstractBinarOper {
         super(first, second, Oper.MUL);
     }
 
-    public int calculate(int a, int b) {
-        int res = a * b;
-        /*int absA = a >= 0 ? a : -a;
-        int absB = b >= 0 ? b : -b;
-        if (((absA >>> 15 != 0) || (absB >>> 15 != 0)) &&
-                ((a == Integer.MIN_VALUE && b == -1) || (b != 0 && res / b != a))) {
-            throw new OverflowException("");
-        }*/
-        if (a != 0 && b != 0 && (res / a != b || res / b != a)) {
-            throw new OverflowException("");
+    public static boolean check(int a, int b) {
+        if (a == 0 || b == 0) {
+            return true;
         }
-        return res;
+        if (a == Integer.MIN_VALUE) {
+            if (b != 1) {
+                return false;
+            }
+            return true;
+        }
+        if (b == Integer.MIN_VALUE) {
+            if (a != 1) {
+                return false;
+            }
+            return true;
+        }
+        if (a == 1 || a == -1 || b == 1 || b == -1) {
+            return true;
+        }
+        if (a > 0 && b > 0 && Integer.MAX_VALUE / b < a || a < 0 && b < 0 && Integer.MAX_VALUE / b > a
+                || a > 0 && b < 0 && Integer.MIN_VALUE / b < a || a < 0 && b > 0 && Integer.MIN_VALUE / b > a) {
+            return false;
+        }
+        return true;
+    }
+
+    public int calculate(int a, int b) {
+        if (!check(a, b)) {
+            overflow(a, b);
+        }
+        return a * b;
     }
 
     public String toMiniString() {
