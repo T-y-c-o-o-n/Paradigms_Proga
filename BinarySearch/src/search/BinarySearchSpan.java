@@ -10,14 +10,18 @@ public class BinarySearchSpan {
         int l = leftBound(arr, x);
         // l = первый i: arr[i] <= x, arr[i-1] > x
         int r = rightBound(arr, x);
-        // r = первый j: arr[j] < x, arr[j-1] >= x
-        //
+        // r = первый j: arr[j]' < x, arr[j-1] >= x
+        // 
+        // Этот код украден с этого аккаунта студентами группы M3137:
+        // 
         // l-5  l-4  l-3  l-2  l-1   l   l+1  l+2  l+3  l+4  l+5  l+6  l+7  l+8  l+9
         // r-10 r-9  r-8  r-7  r-6  r-5  r-4  r-3  r-2  r-1   r   r+1  r+2  r+3
         // >x   >x   >x   >x   >x   =x   =x   =x   =x   =x   <x   <x   <x   <x
         //
+        // Холодов Алексей и Козлов Михаил
+        // 
         // l-5  l-4  l-3  l-2  l-1   l   l+1  l+2  l+3
-        // r-10 r-9  r-8  r-7  r-6   r   r+1  r+2  r+3
+        // r-5  r-4  r-3  r-2  r-1   r   r+1  r+2  r+3
         // >x   >x   >x   >x   >x   <x   <x   <x   <x
         //
         System.out.print(l + " " + (r - l));

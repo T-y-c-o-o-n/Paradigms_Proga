@@ -12,7 +12,7 @@ public class BinarySearch {
     }
 
     // Pre: arr[0]..arr[n-1] отсортирован по невозрастанию
-    // Post: Ret = "индекс вставки", первый элемент <= x
+    // Post: Ret = "индекс вставки", первый i: arr[i] <= x
     public static int iterativeBinSearch(int[] arr, int x) {
         int n = arr.length;
         int l = -1, r = arr.length;

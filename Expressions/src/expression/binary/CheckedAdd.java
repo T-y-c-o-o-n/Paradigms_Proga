@@ -5,7 +5,6 @@ import java.util.EnumSet;
 import expression.AbstractBinarOper;
 import expression.CommonExpression;
 import expression.Oper;
-import expression.exceptions.OverflowException;
 
 public class CheckedAdd extends AbstractBinarOper {
     private static final EnumSet<Oper> firstArgsToAllow = EnumSet.of(Oper.ADD, Oper.SUB, Oper.MUL, Oper.DIV);

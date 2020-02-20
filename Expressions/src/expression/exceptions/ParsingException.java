@@ -1,6 +1,6 @@
 package expression.exceptions;
 
-public class ParsingException extends RuntimeException {
+public class ParsingException extends Exception {
     public ParsingException(String message) {
         super(message);
     }

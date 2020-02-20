@@ -127,7 +127,7 @@ public class ExpressionParser implements Parser {
                 balance++;
                 CommonExpression parsed = parse(0);
                 skipWhitespace();
-                expect(')');
+                expect (')');
                 balance--;
                 return parsed;
             }

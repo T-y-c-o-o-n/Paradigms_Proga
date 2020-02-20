@@ -16,9 +16,7 @@ public class Multiply extends AbstractBinarOper {
     	super(first, second, Oper.MUL);
     }
 
-    public int calculate(int a, int b) {
-        return a * b;
-    }
+    public int calculate(int a, int b) { return a * b; }
 
     public String toMiniString() {
         return super.toMiniString(firstArgsToAllow, secondArgsToAllow);
