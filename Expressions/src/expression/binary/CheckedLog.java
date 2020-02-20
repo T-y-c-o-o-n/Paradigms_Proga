@@ -18,8 +18,11 @@ public class CheckedLog extends AbstractBinarOper {
     }
 
     public int calculate(int b, int a) {
-        if (a <= 1 || b <= 0) {
-            throw new LogArgumentsException("");
+        if (a <= 1) {
+            throw new LogArgumentsException(a + Oper.LOG.toString() + b + " base <= 0 or = 1");
+        }
+        if (b <= 0) {
+            throw new LogArgumentsException(a + Oper.LOG.toString() + b + " argument <= 0");
         }
         int res = 0;
         while(b > 1) {
@@ -29,8 +32,7 @@ public class CheckedLog extends AbstractBinarOper {
             res++;
             b /= a;
         }
-        return res
-                ;
+        return res;
     }
 
     public String toMiniString() {

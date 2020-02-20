@@ -17,8 +17,11 @@ public class CheckedPow extends AbstractBinarOper {
     }
 
     public int calculate(int a, int n) {
-        if (a == 0 && n == 0 || n < 0) {
-            throw new PowArgumentsException("");
+        if (n < 0) {
+            throw new PowArgumentsException(a + Oper.POW.toString() + " degree <= 0");
+        }
+        if (a == 0 && n == 0) {
+            throw new PowArgumentsException(a + Oper.POW.toString() + n);
         }
         if (a == 0 || a == 1) {
             return a;

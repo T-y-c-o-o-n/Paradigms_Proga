@@ -4,12 +4,7 @@ import expression.*;
 import expression.binary.CheckedMultiply;
 import expression.exceptions.PowArgumentsException;
 
-import java.util.EnumSet;
-
 public class CheckedPow2 extends AbstractUnarOper {
-    private static final EnumSet<Oper> firstArgsToAllow = EnumSet.noneOf(Oper.class);
-    private static final EnumSet<Oper> secondArgsToAllow = EnumSet.noneOf(Oper.class);
-
     public CheckedPow2(CommonExpression arg) {
         super(arg, Oper.POW2);
     }
@@ -22,10 +17,16 @@ public class CheckedPow2 extends AbstractUnarOper {
         int res = 1;
         while (n > 0) {
             if (n % 2 == 1) {
-                res = new CheckedMultiply(null, null).calculate(res, a);  // overflow
+                if (!CheckedMultiply.check(res, a)) {
+                    overflow(n);
+                }
+                res *= a;  // overflow
                 n--;
             } else {
-                a = new CheckedMultiply(null, null).calculate(a, a);  // overflow
+                if (!CheckedMultiply.check(a, a)) {
+                    overflow(n);
+                }
+                a *= a;  // overflow
                 n /= 2;
             }
         }

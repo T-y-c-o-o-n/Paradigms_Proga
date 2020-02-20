@@ -33,8 +33,8 @@ public abstract class AbstractBinarOper implements CommonExpression {
 		return calculate(arg1.evaluate(x, y, z), arg2.evaluate(x, y, z));
 	}
 
-	protected void overflow(Integer a, Integer b) {
-		throw new OverflowException(a.toString() + me + b.toString());
+	protected void overflow(int a, int b) {
+		throw new OverflowException(a + me.toString() + b);
 	}
 
 	public String toString() {

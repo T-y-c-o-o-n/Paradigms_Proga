@@ -41,8 +41,8 @@ public abstract class AbstractUnarOper implements CommonExpression {
         return calculate(arg.evaluate(x, y, z));
     }
 
-    protected void overflow(Integer a) {
-        throw new OverflowException(me + a.toString());
+    protected void overflow(int a) {
+        throw new OverflowException(me.toString() + a);
     }
 
     public String checkString(EnumSet<Oper> allowed) {
