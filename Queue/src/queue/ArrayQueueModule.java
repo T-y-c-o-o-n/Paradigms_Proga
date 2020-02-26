@@ -18,7 +18,7 @@ public class ArrayQueueModule {
     private static int head = 0, tail = 0;
     private static Object[] elements = new Object[cap];
 
-    // Pre: Q = {e_1, e_2, ..., e_n}
+    // Pre: true
     // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
     public static void enqueue(Object e) {
         assert e != null;
@@ -30,8 +30,8 @@ public class ArrayQueueModule {
         }
     }
 
-    // Pre: Q = [a_e, e_2, ..., e_n-1, e_n] && |Q| > 0
-    // Post: R = e_1 && Q' = [a_2, ..., e_n] && |Q'| = |Q| - 1
+    // Pre: |Q| > 0
+    // Post: R = e_1 && Q' = {a_2, ..., e_n} && |Q'| = |Q| - 1
     public static Object dequeue() {
         assert size > 0;
         Object result = elements[head];
@@ -96,6 +96,33 @@ public class ArrayQueueModule {
         }
         sb.append(']');
         return sb.toString();
+    }
+
+    public static void push(Object e) {
+        assert e != null;
+        head = dec(head);
+        elements[head] = e;
+        size++;
+        if (size == cap) {
+            increaseCapacity();
+        }
+    }
+
+    public static Object remove() {
+        assert size > 0;
+        tail = dec(tail);
+        Object result = elements[tail];
+        elements[tail] = null;
+        size--;
+        if (size * 4 == cap) {
+            decreaseCapacity();
+        }
+        return result;
+    }
+
+    public static Object peek() {
+        assert size > 0;
+        return elements[dec(tail)];
     }
 
     private static void increaseCapacity() {
