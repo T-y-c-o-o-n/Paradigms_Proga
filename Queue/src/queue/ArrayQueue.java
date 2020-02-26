@@ -4,62 +4,152 @@ import java.util.Arrays;
 
 public class ArrayQueue {
     // INV:
-    // size == last - first
-    // if size > 0:
-    //      queue[first] - first element;
-    //      queue[last - 1] - last element;
-    private Object[] elements = new Object[2];
-    private int size = 0, first = 0, last = 0;
+    // First in - Last out
+    /*
+    INVs реализации:
+    capacity > 0
+    0 <= head, tail < capacity
+    size == (head - tail) % capacity (% математический!!)
+    if size > 0:
+        elements[head] - first element;
+        elements[(tail - 1) % capacity] - last element; (% математический!!)
+    */
+    private int cap = 2, size = 0;
+    private int head = 0, tail = 0;
+    private Object[] elements = new Object[cap];
 
-    // Pre: queue[a_1, a_2, ..., a_n]; size > 0
-    // Post: queue[a_1, a_2, ..., a_n, a_n+1]
-    public void enqueue(/*ArrayQueue this,*/Object object) {
-        if (/*this.*/last == /*this.*/elements.length) {
-            /*this.*/elements = Arrays.copyOf(/*this.*/elements, /*this.*/elements.length * 2);
+    // Pre: true
+    // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
+    public void enqueue(/*ArrayQueue this, */Object e) {
+        assert e != null;
+        elements[tail] = e;
+        tail = inc(tail);
+        size++;
+        if (size == cap) {
+            increaseCapacity();
         }
-        /*this.*/elements[/*this.*/last++] = object;
-        /*this.*/size++;
     }
 
-    // Pre: queue[a_1, a_2, ..., a_n]; size > 0
-    // Post: R = a_1
-    public Object element(/*ArrayQueue this*/) {
-        assert /*this.*/size > 0;
-        return /*this.*/elements[/*this.*/first];
-    }
-
-    // Pre: queue[a_1, a_2, ..., a_n-1, a_n]; size > 0
-    // Post: queue[a_2, ..., a_n]; size' = size - 1
+    // Pre: |Q| > 0
+    // Post: R = e_1 && Q' = {e_2, ..., e_n} && |Q'| = |Q| - 1
     public Object dequeue(/*ArrayQueue this*/) {
-        assert /*this.*/size > 0;
-        Object element = /*this.*/elements[/*this.*/first];
-        /*this.*/elements[/*this.*/first] = null;
-        /*this.*/first++;
-        /*this.*/size--;
-        return element;
+        assert size > 0;
+        Object result = elements[head];
+        elements[head] = null;
+        head = inc(head);
+        size--;
+        if (size * 4 == cap) {
+            decreaseCapacity();
+        }
+        return result;
     }
 
-    // Pre: -
-    // Post: R = size
+    // Pre: |Q| > 0
+    // Post: R = e_1
+    public Object element(/*ArrayQueue this*/) {
+        assert size > 0;
+        return elements[head];
+    }
+
+    // Pre: true
+    // Post: R = |Q|
     public int size(/*ArrayQueue this*/) {
-        return /*this.*/size;
+        return size;
     }
 
-    // Pre: -
-    // Post: R = (size == 0)
+    // Pre: true
+    // Post: R = (|Q| == 0)
     public boolean isEmpty(/*ArrayQueue this*/) {
-        return /*this.*/size == 0;
+        return size == 0;
     }
 
-    // Pre: -
-    // Post: size == 0
+    // Pre: true
+    // Post: |Q| == 0
     public void clear(/*ArrayQueue this*/) {
-        while (/*this.*/size > 0) {
-            /*this.*/dequeue();
+        cap = 2;
+        size = 0;
+        head = 0;
+        tail = 0;
+        elements = new Object[cap];
+    }
+
+    // Pre: true
+    // Post: R = [e_1, e_2, ..., e_n-1, e_n]
+    public Object[] toArray(/*ArrayQueue this*/) {
+        Object[] result = new Object[size];
+        for (int i = 0; i < size; i++) {
+            result[i] = elements[(head + i) % cap];
+        }
+        return result;
+    }
+
+    // Pre: true
+    // Post: R = "[e_1, e_2, ..., e_n-1, e_n]"
+    public String toStr(/*ArrayQueue this*/) {
+        StringBuilder sb = new StringBuilder("[");
+        if (size > 0) {
+            sb.append(elements[head]);
+        }
+        for (int i = 1; i < size; i++) {
+            sb.append(", ");
+            sb.append(elements[(head + i) % cap]);
+        }
+        sb.append(']');
+        return sb.toString();
+    }
+
+    // Pre: true
+    // Post: Q' = {e, e_1, e_2, ..., e_n-1, e_n} && |Q| > 0
+    public void push(/*ArrayQueue this, */Object e) {
+        assert e != null;
+        head = dec(head);
+        elements[head] = e;
+        size++;
+        if (size == cap) {
+            increaseCapacity();
         }
     }
 
-    public Object[] toArray() {
-        return Arrays.copyOfRange(elements, first, last);
+    // Pre: |Q| > 0
+    // Post: R = e_n && Q' = {e_1, e_2, ..., e_n-1} && |Q'| = |Q| - 1
+    public Object remove(/*ArrayQueueADT this*/) {
+        assert size > 0;
+        tail = dec(tail);
+        Object result = elements[tail];
+        elements[tail] = null;
+        size--;
+        if (size * 4 == cap) {
+            decreaseCapacity();
+        }
+        return result;
+    }
+
+    // Pre: |Q| > 0
+    // Post: R = e_n
+    public Object peek(/*ArrayQueue this*/) {
+        assert size > 0;
+        return elements[dec(tail)];
+    }
+
+    private void increaseCapacity(/*ArrayQueue this*/) {
+        elements = Arrays.copyOf(toArray(), cap * 2);
+        cap *= 2;
+        head = 0;
+        tail = size;
+    }
+
+    private void decreaseCapacity(/*ArrayQueue this*/) {
+        elements = Arrays.copyOf(toArray(), cap / 2);
+        cap /= 2;
+        head = 0;
+        tail = size;
+    }
+
+    private int inc(/*ArrayQueue this, */int a) {
+        return (a + 1) % cap;
+    }
+
+    private int dec(/*ArrayQueue this, */int a) {
+        return (cap + a - 1) % cap;
     }
 }
