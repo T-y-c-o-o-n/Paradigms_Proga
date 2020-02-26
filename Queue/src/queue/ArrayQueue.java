@@ -54,10 +54,12 @@ public class ArrayQueue {
     // Pre: -
     // Post: size == 0
     public void clear(/*ArrayQueue this*/) {
-        while (/*this.*/first < /*this.*/last) {
-            /*this.*/elements[/*this.*/first] = null;
-            /*this.*/first++;
-            /*this.*/size--;
+        while (/*this.*/size > 0) {
+            /*this.*/dequeue();
         }
+    }
+
+    public Object[] toArray() {
+        return Arrays.copyOfRange(elements, first, last);
     }
 }

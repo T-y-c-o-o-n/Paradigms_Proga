@@ -54,10 +54,8 @@ public class ArrayQueueADT {
     // Pre: -
     // Post: size == 0
     public static void clear(ArrayQueueADT q) {
-        while (q.first < q.last) {
-            q.elements[q.first] = null;
-            q.first++;
-            q.size--;
+        while (q.size > 0) {
+            dequeue(q);
         }
     }
 }

@@ -4,60 +4,119 @@ import java.util.Arrays;
 
 public class ArrayQueueModule {
     // INV:
-    // size == last - first
-    // if size > 0:
-    //      queue[first] - first element;
-    //      queue[last - 1] - last element;
-    private static Object[] queue = new Object[2];
-    private static int size = 0, first = 0, last = 0;
+    // First in - Last out
+    /*
+    INVs реализации:
+    capacity > 0
+    0 <= head, tail < capacity
+    size == (head - tail) % capacity (% математический!!)
+    if size > 0:
+        elements[head] - first element;
+        elements[(tail - 1) % capacity] - last element; (% математический!!)
+    */
+    private static int cap = 2, size = 0;
+    private static int head = 0, tail = 0;
+    private static Object[] elements = new Object[cap];
 
-    // Pre: queue[a_1, a_2, ..., a_n]; size > 0
-    // Post: queue[a_1, a_2, ..., a_n, a_n+1]
-    public static void enqueue(Object object) {
-        if (last == queue.length) {
-            queue = Arrays.copyOf(queue, queue.length * 2);
-        }
-        queue[last++] = object;
+    // Pre: Q = {e_1, e_2, ..., e_n}
+    // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
+    public static void enqueue(Object e) {
+        assert e != null;
+        elements[tail] = e;
+        tail = inc(tail);
         size++;
+        if (size == cap) {
+            increaseCapacity();
+        }
     }
 
-    // Pre: queue[a_1, a_2, ..., a_n]; size > 0
-    // Post: R = a_1
-    public static Object element() {
-        assert size > 0;
-        return queue[first];
-    }
-
-    // Pre: queue[a_1, a_2, ..., a_n-1, a_n]; size > 0
-    // Post: queue[a_2, ..., a_n]; size' = size - 1
+    // Pre: Q = [a_e, e_2, ..., e_n-1, e_n] && |Q| > 0
+    // Post: R = e_1 && Q' = [a_2, ..., e_n] && |Q'| = |Q| - 1
     public static Object dequeue() {
         assert size > 0;
-        Object element = queue[first];
-        queue[first] = null;
-        first++;
+        Object result = elements[head];
+        elements[head] = null;
+        head = inc(head);
         size--;
-        return element;
+        if (size * 4 == cap) {
+            decreaseCapacity();
+        }
+        return result;
     }
 
-    // Pre: -
-    // Post: R = size
+    // Pre: |Q| > 0
+    // Post: R = e_1
+    public static Object element() {
+        assert size > 0;
+        return elements[head];
+    }
+
+    // Pre: true
+    // Post: R = |Q|
     public static int size() {
         return size;
     }
 
-    // Pre: -
-    // Post: R = (size == 0)
+    // Pre: true
+    // Post: R = (|Q| == 0)
     public static boolean isEmpty() {
         return size == 0;
     }
 
-    // Pre: -
-    // Post: size == 0
+    // Pre: true
+    // Post: |Q| == 0
     public static void clear() {
-        while (first < last) {
-            queue[first] = null;
-            first++;
-            size--;
+        cap = 2;
+        size = 0;
+        head = 0;
+        tail = 0;
+        elements = new Object[cap];
+    }
+
+    // Pre: true
+    // Post: R = [e_1, e_2, ..., e_n-1, e_n]
+    public static Object[] toArray() {
+        Object[] result = new Object[size];
+        for (int i = 0; i < size; i++) {
+            result[i] = elements[(head + i) % cap];
         }
+        return result;
+    }
+
+    // Pre: true
+    // Post: R = "[e_1, e_2, ..., e_n-1, e_n]"
+    public static String toStr() {
+        StringBuilder sb = new StringBuilder("[");
+        if (size > 0) {
+            sb.append(elements[head]);
+        }
+        for (int i = 1; i < size; i++) {
+            sb.append(", ");
+            sb.append(elements[(head + i) % cap]);
+        }
+        sb.append(']');
+        return sb.toString();
+    }
+
+    private static void increaseCapacity() {
+        elements = Arrays.copyOf(toArray(), cap * 2);
+        cap *= 2;
+        head = 0;
+        tail = size;
+    }
+
+    private static void decreaseCapacity() {
+        elements = Arrays.copyOf(toArray(), cap / 2);
+        cap /= 2;
+        head = 0;
+        tail = size;
+    }
+
+    private static int inc(int a) {
+        return (a + 1) % cap;
+    }
+
+    private static int dec(int a) {
+        return (cap + a - 1) % cap;
     }
 }
