@@ -31,7 +31,7 @@ public class ArrayQueueModule {
     }
 
     // Pre: |Q| > 0
-    // Post: R = e_1 && Q' = {a_2, ..., e_n} && |Q'| = |Q| - 1
+    // Post: R = e_1 && Q' = {e_2, ..., e_n} && |Q'| = |Q| - 1
     public static Object dequeue() {
         assert size > 0;
         Object result = elements[head];
@@ -98,6 +98,8 @@ public class ArrayQueueModule {
         return sb.toString();
     }
 
+    // Pre: true
+    // Post: Q' = {e, e_1, e_2, ..., e_n-1, e_n} && |Q| > 0
     public static void push(Object e) {
         assert e != null;
         head = dec(head);
@@ -108,6 +110,8 @@ public class ArrayQueueModule {
         }
     }
 
+    // Pre: |Q| > 0
+    // Post: R = e_n && Q' = {e_1, e_2, ..., e_n-1} && |Q'| = |Q| - 1
     public static Object remove() {
         assert size > 0;
         tail = dec(tail);
@@ -120,6 +124,8 @@ public class ArrayQueueModule {
         return result;
     }
 
+    // Pre: |Q| > 0
+    // Post: R = e_n
     public static Object peek() {
         assert size > 0;
         return elements[dec(tail)];
