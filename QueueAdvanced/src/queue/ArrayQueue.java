@@ -1,15 +1,10 @@
 package queue;
 
 public class ArrayQueue extends AbstractQueue {
-    // INV:
-    // Q = {e_first, e_2, e_3, ..., e_n-1, e_last}
-    // First in - Last out
     private int head = 0, tail = 0;
     private Object[] elements = new Object[2];
 
-    // Pre: e not null
-    // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
-    public void enqueue(/*ArrayQueue this, */Object e) {
+    public void enqueue(Object e) {
         assert e != null;
         elements[tail] = e;
         tail = inc(tail);
@@ -18,9 +13,7 @@ public class ArrayQueue extends AbstractQueue {
         }
     }
 
-    // Pre: |Q| > 0
-    // Post: R = e_1 && Q' = {e_2, ..., e_n} && |Q'| = |Q| - 1
-    public Object dequeue(/*ArrayQueue this*/) {
+    public Object dequeue() {
         assert size() > 0;
         Object result = elements[head];
         elements[head] = null;
@@ -28,37 +21,29 @@ public class ArrayQueue extends AbstractQueue {
         return result;
     }
 
-    // Pre: |Q| > 0
-    // Post: R = e_1
-    public Object element(/*ArrayQueue this*/) {
+    public Object element() {
         assert size() > 0;
         return elements[head];
     }
 
-    // Pre: true
-    // Post: R = |Q|
-    public int size(/*ArrayQueue this*/) {
+    public int size() {
         if (head == tail) {
             return elements[head] == null ? 0 : elements.length;
         }
         return head > tail ? elements.length - (head - tail) : tail - head;
     }
 
-    // Pre: true
-    // Post: R = (|Q| == 0)
-    public boolean isEmpty(/*ArrayQueue this*/) {
+    public boolean isEmpty() {
         return size() == 0;
     }
 
-    // Pre: true
-    // Post: |Q| == 0
-    public void clear(/*ArrayQueue this*/) {
+    public void clear() {
         head = 0;
         tail = 0;
         elements = new Object[2];
     }
 
-    private void increaseCapacity(/*ArrayQueue this*/) {
+    private void increaseCapacity() {
         Object[] increased = new Object[elements.length * 2];
         System.arraycopy(elements, head, increased, 0, elements.length - head);
         System.arraycopy(elements, 0, increased, elements.length - head, tail);
