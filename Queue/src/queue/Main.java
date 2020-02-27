@@ -9,23 +9,20 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        randomTest(30);
+        //randomTest(30);
         for (int i = 0; i < 100; ++i) {
             String type = sc.next();
-            if (type == "+") {
+            if (type.equals("+")) {
                 ArrayQueueModule.enqueue(sc.next());
             }
-            if (type == "-") {
+            if (type.equals("-")) {
                 System.out.println(ArrayQueueModule.dequeue());
             }
-            if (type == "?") {
+            if (type.equals("?")) {
                 System.out.println(ArrayQueueModule.element());
             }
-            if (type == "s") {
+            if (type.equals("s")) {
                 System.out.println(ArrayQueueModule.size());
-            }
-            if (type == "arr") {
-                System.out.println(Arrays.toString(ArrayQueueModule.toArray()));
             }
         }
     }
@@ -45,9 +42,6 @@ public class Main {
             }
             if (type == 3) {
                 System.out.println(ArrayQueueModule.size());
-            }
-            if (type == 4) {
-                System.out.println(Arrays.toString(ArrayQueueModule.toArray()));
             }
         }
     }
