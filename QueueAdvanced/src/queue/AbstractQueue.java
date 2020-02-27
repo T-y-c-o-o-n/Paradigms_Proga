@@ -2,7 +2,7 @@ package queue;
 
 import java.util.ArrayDeque;
 
-public abstract class AbstractQueue<Type> implements Queue<Type> {
+public abstract class AbstractQueue implements Queue {
     protected int size;
 
     protected AbstractQueue() {}
@@ -13,11 +13,5 @@ public abstract class AbstractQueue<Type> implements Queue<Type> {
 
     public boolean isEmpty() {
         return size == 0;
-    }
-
-    public void clear() {
-        while (size > 0) {
-            dequeue();
-        }
     }
 }

@@ -1,28 +1,32 @@
 package queue;
 
-public interface Queue<Type> {
+interface Queue {
+    // INV:
+    // Q = {e_first, e_2, e_3, ..., e_n-1, e_last}
+    // First in - Last out
+    
+    
+    // Pre: e not null
+    // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
+    void enqueue(Object e);
 
-    // Pre: queue[a_1, a_2, ..., a_n]; size > 0
-    // Post: queue[a_1, a_2, ..., a_n, a_n+1]
-    void enqueue(Type elem);  // 0
+    // Pre: |Q| > 0
+    // Post: R = e_1 && Q' = {e_2, ..., e_n} && |Q'| = |Q| - 1
+    Object dequeue();
 
-    // Pre: queue[a_1, a_2, ..., a_n]; size > 0
-    // Post: R = a_1
-    Type element();  // 1
+    // Pre: |Q| > 0
+    // Post: R = e_1
+    Object element();
 
-    // Pre: queue[a_1, a_2, ..., a_n-1, a_n]; size > 0
-    // Post: queue[a_2, ..., a_n]; size' = size - 1
-    Type dequeue();  // 2
+    // Pre: true
+    // Post: R = |Q|
+    int size();
 
-    // Pre: -
-    // Post: R = size
-    int size();  // 3
+    // Pre: true
+    // Post: R = (|Q| == 0)
+    boolean isEmpty();
 
-    // Pre: -
-    // Post: R = (size == 0)
-    boolean isEmpty();  // 4
-
-    // Pre: -
-    // Post: size == 0
-    void clear();  // 5
+    // Pre: true
+    // Post: |Q| == 0
+    void clear();
 }
