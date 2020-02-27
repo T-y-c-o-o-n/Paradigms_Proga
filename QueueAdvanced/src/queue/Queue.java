@@ -3,7 +3,7 @@ package queue;
 interface Queue {
     // INV:
     // Q = {e_first, e_2, e_3, ..., e_n-1, e_last}
-    // First in - Last out
+    // First in - First out
     
     
     // Pre: e not null

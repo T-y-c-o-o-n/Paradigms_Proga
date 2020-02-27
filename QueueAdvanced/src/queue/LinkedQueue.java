@@ -1,48 +1,47 @@
 package queue;
 
-public class LinkedQueue<Type> extends AbstractQueue<Type> implements Queue<Type> {
-    private Node first, last;
+public class LinkedQueue extends AbstractQueue {
+    private Node head, tail;
 
     public LinkedQueue() {
         super();
-        first = new Node(null);
-        last = new Node(null);
-        first.prev = last;
-        size = 0;
+        tail = new Node(null, head);
     }
 
-    public void enqueue(Type element) {
-        last.prev = new Node(element);
-        last = last.prev;
-        if (size == 0) {
-            first = last;
-        }
+    public void enqueue(Object element) {
+        tail.prev = new Node(element, head);
+        tail = tail.prev;
         size++;
     }
 
-    public Type element() {
+    public Object dequeue() {
         assert size > 0;
-        return first.value;
-    }
 
-    public Type dequeue() {
-        assert size > 0;
-        Type element = first.value;
-        first = first.prev;
+        Object element = head.value;
+        head = head.prev;
         size--;
         return element;
     }
 
-    private class Node {
-        private final Type value;  // final!!
-        private final Node prev;  // final!!
+    public Object element() {
+        assert size > 0;
 
-        private Node(Type value) {
+        return head.value;
+    }
+
+    public void clear() {
+        head = null;
+        tail = null;
+        size = 0;
+    }
+
+    private /*static ??? */ class Node {
+        private final Object value;  // final!!
+        private Node prev;
+
+        private Node(Object value, Node prev) {
             this.value = value;
-            LinkedQueue.this.size();  // если класс Node не static, то есть неявная ссылка на класс, который его создал
-            // если Node static, то нет неявной ссылки на LinkedQueue, и нельзя
-            LinkedQueue outer = queue.LinkedQueue.this;
-            LinkedQueue outerr = LinkedQueue.this;  // внутренний класс может и короткое имя юзать
+            this.prev = prev;
         }
     }
 }
