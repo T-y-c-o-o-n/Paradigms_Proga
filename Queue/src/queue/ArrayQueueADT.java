@@ -14,9 +14,9 @@ public class ArrayQueueADT {
         elements[head] - first element;
         elements[(tail - 1) % capacity] - last element; (% математический!!)
     */
-    private int cap = 2, size = 0;
+    private int  size = 0;
     private int head = 0, tail = 0;
-    private Object[] elements = new Object[cap];
+    private Object[] elements = new Object[2];
 
     // Pre: true
     // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
@@ -25,7 +25,7 @@ public class ArrayQueueADT {
         q.elements[q.tail] = e;
         q.tail = inc(q, q.tail);
         q.size++;
-        if (q.size == q.cap) {
+        if (q.size == q.elements.length) {
             increaseCapacity(q);
         }
     }
@@ -38,9 +38,6 @@ public class ArrayQueueADT {
         q.elements[q.head] = null;
         q.head = inc(q, q.head);
         q.size--;
-        if (q.size * 4 == q.cap) {
-            decreaseCapacity(q);
-        }
         return result;
     }
 
@@ -66,11 +63,10 @@ public class ArrayQueueADT {
     // Pre: true
     // Post: |Q| == 0
     public static void clear(ArrayQueueADT q) {
-        q.cap = 2;
         q.size = 0;
         q.head = 0;
         q.tail = 0;
-        q.elements = new Object[q.cap];
+        q.elements = new Object[2];
     }
 
     // Pre: true
@@ -78,7 +74,7 @@ public class ArrayQueueADT {
     public static Object[] toArray(ArrayQueueADT q) {
         Object[] result = new Object[q.size];
         for (int i = 0; i < q.size; i++) {
-            result[i] = q.elements[(q.head + i) % q.cap];
+            result[i] = q.elements[(q.head + i) % q.elements.length];
         }
         return result;
     }
@@ -92,7 +88,7 @@ public class ArrayQueueADT {
         }
         for (int i = 1; i < q.size; i++) {
             sb.append(", ");
-            sb.append(q.elements[(q.head + i) % q.cap]);
+            sb.append(q.elements[(q.head + i) % q.elements.length]);
         }
         sb.append(']');
         return sb.toString();
@@ -105,7 +101,7 @@ public class ArrayQueueADT {
         q.head = dec(q, q.head);
         q.elements[q.head] = e;
         q.size++;
-        if (q.size == q.cap) {
+        if (q.size == q.elements.length) {
             increaseCapacity(q);
         }
     }
@@ -118,9 +114,6 @@ public class ArrayQueueADT {
         Object result = q.elements[q.tail];
         q.elements[q.tail] = null;
         q.size--;
-        if (q.size * 4 == q.cap) {
-            decreaseCapacity(q);
-        }
         return result;
     }
 
@@ -132,24 +125,19 @@ public class ArrayQueueADT {
     }
 
     private static void increaseCapacity(ArrayQueueADT q) {
-        q.elements = Arrays.copyOf(toArray(q), q.cap * 2);
-        q.cap *= 2;
-        q.head = 0;
-        q.tail = q.size;
-    }
-
-    private static void decreaseCapacity(ArrayQueueADT q) {
-        q.elements = Arrays.copyOf(toArray(q), q.cap / 2);
-        q.cap /= 2;
+        Object[] increased = new Object[q.elements.length * 2];
+        System.arraycopy(q.elements, q.head, increased, 0, q.elements.length - q.head);
+        System.arraycopy(q.elements, 0, increased, q.elements.length - q.head, q.tail);
+        q.elements = increased;
         q.head = 0;
         q.tail = q.size;
     }
 
     private static int inc(ArrayQueueADT q, int a) {
-        return (a + 1) % q.cap;
+        return (a + 1) % q.elements.length;
     }
 
     private static int dec(ArrayQueueADT q, int a) {
-        return (q.cap + a - 1) % q.cap;
+        return (q.elements.length + a - 1) % q.elements.length;
     }
 }

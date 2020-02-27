@@ -1,6 +1,9 @@
 package queue;
 
+import javax.xml.crypto.dsig.spec.ExcC14NParameterSpec;
 import java.util.Arrays;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 public class ArrayQueueModule {
     // INV:
@@ -14,9 +17,9 @@ public class ArrayQueueModule {
         elements[head] - first element;
         elements[(tail - 1) % capacity] - last element; (% математический!!)
     */
-    private static int cap = 2, size = 0;
+    private static int size = 0;
     private static int head = 0, tail = 0;
-    private static Object[] elements = new Object[cap];
+    private static Object[] elements = new Object[2];
 
     // Pre: true
     // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
@@ -25,7 +28,7 @@ public class ArrayQueueModule {
         elements[tail] = e;
         tail = inc(tail);
         size++;
-        if (size == cap) {
+        if (size == elements.length) {
             increaseCapacity();
         }
     }
@@ -38,9 +41,6 @@ public class ArrayQueueModule {
         elements[head] = null;
         head = inc(head);
         size--;
-        if (size * 4 == cap) {
-            decreaseCapacity();
-        }
         return result;
     }
 
@@ -66,20 +66,21 @@ public class ArrayQueueModule {
     // Pre: true
     // Post: |Q| == 0
     public static void clear() {
-        cap = 2;
         size = 0;
         head = 0;
         tail = 0;
-        elements = new Object[cap];
+        elements = new Object[2];
     }
 
     // Pre: true
     // Post: R = [e_1, e_2, ..., e_n-1, e_n]
     public static Object[] toArray() {
-        Object[] result = new Object[size];
-        for (int i = 0; i < size; i++) {
-            result[i] = elements[(head + i) % cap];
+        if (head <= tail) {
+            return Arrays.copyOfRange(elements, head, tail);
         }
+        Object[] result = new Object[size];
+        System.arraycopy(elements, head, result, 0, elements.length - head);
+        System.arraycopy(elements, 0, result, elements.length - head, tail);
         return result;
     }
 
@@ -92,7 +93,7 @@ public class ArrayQueueModule {
         }
         for (int i = 1; i < size; i++) {
             sb.append(", ");
-            sb.append(elements[(head + i) % cap]);
+            sb.append(elements[(head + i) % elements.length]);
         }
         sb.append(']');
         return sb.toString();
@@ -105,7 +106,7 @@ public class ArrayQueueModule {
         head = dec(head);
         elements[head] = e;
         size++;
-        if (size == cap) {
+        if (size == elements.length) {
             increaseCapacity();
         }
     }
@@ -118,9 +119,6 @@ public class ArrayQueueModule {
         Object result = elements[tail];
         elements[tail] = null;
         size--;
-        if (size * 4 == cap) {
-            decreaseCapacity();
-        }
         return result;
     }
 
@@ -132,24 +130,19 @@ public class ArrayQueueModule {
     }
 
     private static void increaseCapacity() {
-        elements = Arrays.copyOf(toArray(), cap * 2);
-        cap *= 2;
-        head = 0;
-        tail = size;
-    }
-
-    private static void decreaseCapacity() {
-        elements = Arrays.copyOf(toArray(), cap / 2);
-        cap /= 2;
+        Object[] increased = new Object[elements.length * 2];
+        System.arraycopy(elements, head, increased, 0, elements.length - head);
+        System.arraycopy(elements, 0, increased, elements.length - head, tail);
+        elements = increased;
         head = 0;
         tail = size;
     }
 
     private static int inc(int a) {
-        return (a + 1) % cap;
+        return (a + 1) % elements.length;
     }
 
     private static int dec(int a) {
-        return (cap + a - 1) % cap;
+        return (elements.length + a - 1) % elements.length;
     }
 }

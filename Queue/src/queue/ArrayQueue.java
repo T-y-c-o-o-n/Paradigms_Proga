@@ -14,9 +14,9 @@ public class ArrayQueue {
         elements[head] - first element;
         elements[(tail - 1) % capacity] - last element; (% математический!!)
     */
-    private int cap = 2, size = 0;
+    private int size = 0;
     private int head = 0, tail = 0;
-    private Object[] elements = new Object[cap];
+    private Object[] elements = new Object[2];
 
     // Pre: true
     // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
@@ -25,7 +25,7 @@ public class ArrayQueue {
         elements[tail] = e;
         tail = inc(tail);
         size++;
-        if (size == cap) {
+        if (size == elements.length) {
             increaseCapacity();
         }
     }
@@ -38,9 +38,6 @@ public class ArrayQueue {
         elements[head] = null;
         head = inc(head);
         size--;
-        if (size * 4 == cap) {
-            decreaseCapacity();
-        }
         return result;
     }
 
@@ -66,11 +63,10 @@ public class ArrayQueue {
     // Pre: true
     // Post: |Q| == 0
     public void clear(/*ArrayQueue this*/) {
-        cap = 2;
         size = 0;
         head = 0;
         tail = 0;
-        elements = new Object[cap];
+        elements = new Object[2];
     }
 
     // Pre: true
@@ -78,7 +74,7 @@ public class ArrayQueue {
     public Object[] toArray(/*ArrayQueue this*/) {
         Object[] result = new Object[size];
         for (int i = 0; i < size; i++) {
-            result[i] = elements[(head + i) % cap];
+            result[i] = elements[(head + i) % elements.length];
         }
         return result;
     }
@@ -92,7 +88,7 @@ public class ArrayQueue {
         }
         for (int i = 1; i < size; i++) {
             sb.append(", ");
-            sb.append(elements[(head + i) % cap]);
+            sb.append(elements[(head + i) % elements.length]);
         }
         sb.append(']');
         return sb.toString();
@@ -105,7 +101,7 @@ public class ArrayQueue {
         head = dec(head);
         elements[head] = e;
         size++;
-        if (size == cap) {
+        if (size == elements.length) {
             increaseCapacity();
         }
     }
@@ -118,9 +114,6 @@ public class ArrayQueue {
         Object result = elements[tail];
         elements[tail] = null;
         size--;
-        if (size * 4 == cap) {
-            decreaseCapacity();
-        }
         return result;
     }
 
@@ -132,24 +125,19 @@ public class ArrayQueue {
     }
 
     private void increaseCapacity(/*ArrayQueue this*/) {
-        elements = Arrays.copyOf(toArray(), cap * 2);
-        cap *= 2;
-        head = 0;
-        tail = size;
-    }
-
-    private void decreaseCapacity(/*ArrayQueue this*/) {
-        elements = Arrays.copyOf(toArray(), cap / 2);
-        cap /= 2;
+        Object[] increased = new Object[elements.length * 2];
+        System.arraycopy(elements, head, increased, 0, elements.length - head);
+        System.arraycopy(elements, 0, increased, elements.length - head, tail);
+        elements = increased;
         head = 0;
         tail = size;
     }
 
     private int inc(/*ArrayQueue this, */int a) {
-        return (a + 1) % cap;
+        return (a + 1) % elements.length;
     }
 
     private int dec(/*ArrayQueue this, */int a) {
-        return (cap + a - 1) % cap;
+        return (elements.length + a - 1) % elements.length;
     }
 }
