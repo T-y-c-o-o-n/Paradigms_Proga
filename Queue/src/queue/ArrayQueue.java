@@ -2,6 +2,23 @@ package queue;
 
 public class ArrayQueue {
     // INV:
+    /*
+    *      МНЕНИЕ О КАРТИНКАХ В ИНВАРИАНТЕ ОЧЕРЕДИ
+    *
+    *                  __
+    *                / | \
+    *              /  |   \
+    *             |-------|     <--- HEAD
+    *            |       |
+    *           |       |
+    *          |       |
+    *         |       |
+    *     ---|       |----
+    *   /     \     /     \
+    *  |      |----|      |     <--- BALLS
+    *  \     /     \     /
+    *   ----        ----
+     */
     // Q = {e_first, e_2, e_3, ..., e_n-1, e_last}
     // First in - Last out
     private int head = 0, tail = 0;
