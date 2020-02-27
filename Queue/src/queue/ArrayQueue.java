@@ -13,11 +13,11 @@ public class ArrayQueue {
     *           |       |
     *          |       |
     *         |       |
-    *     ---|       |----
+    *     ___|       |____
     *   /     \     /     \
     *  |      |----|      |     <--- BALLS
-    *  \     /     \     /
-    *   ----        ----
+    *  \_____/     \_____/
+    *
      */
     // Q = {e_first, e_2, e_3, ..., e_n-1, e_last}
     // First in - Last out
