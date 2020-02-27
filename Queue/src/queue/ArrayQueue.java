@@ -7,7 +7,7 @@ public class ArrayQueue {
     private int head = 0, tail = 0;
     private Object[] elements = new Object[2];
 
-    // Pre: true
+    // Pre: e not null
     // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
     public void enqueue(/*ArrayQueue this, */Object e) {
         assert e != null;
@@ -58,7 +58,7 @@ public class ArrayQueue {
         elements = new Object[2];
     }
 
-    // Pre: true
+    // Pre: e not null
     // Post: Q' = {e, e_1, e_2, ..., e_n-1, e_n} && |Q| > 0
     public void push(/*ArrayQueue this, */Object e) {
         assert e != null;

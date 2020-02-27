@@ -7,7 +7,7 @@ public class ArrayQueueADT {
     private int head = 0, tail = 0;
     private Object[] elements = new Object[2];
 
-    // Pre: q not null
+    // Pre: q not null && e not null
     // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
     public static void enqueue(ArrayQueueADT q, Object e) {
         assert q != null;
@@ -64,7 +64,7 @@ public class ArrayQueueADT {
         q.elements = new Object[2];
     }
 
-    // Pre: q not null
+    // Pre: q not null && e not null
     // Post: Q' = {e, e_1, e_2, ..., e_n-1, e_n} && |Q| > 0
     public static void push(ArrayQueueADT q, Object e) {
         assert q != null;
