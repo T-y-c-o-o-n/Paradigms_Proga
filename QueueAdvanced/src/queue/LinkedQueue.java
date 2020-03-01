@@ -5,33 +5,30 @@ public class LinkedQueue extends AbstractQueue {
 
     public LinkedQueue() {
         super();
-        tail = new Node(null, head);
+        head = tail = new Node(null, null);
     }
 
     public void enqueue(Object element) {
-        tail.prev = new Node(element, head);
-        tail = tail.prev;
+        tail = tail.prev = new Node(element, head);
         size++;
     }
 
     public Object dequeue() {
         assert size > 0;
 
-        Object element = head.value;
         head = head.prev;
         size--;
-        return element;
+        return head.value;
     }
 
     public Object element() {
         assert size > 0;
 
-        return head.value;
+        return head.prev.value;
     }
 
     public void clear() {
-        head = null;
-        tail = null;
+        head = tail = new Node(null, null);
         size = 0;
     }
 
