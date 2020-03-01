@@ -5,11 +5,11 @@ public class LinkedQueue extends AbstractQueue {
 
     public LinkedQueue() {
         super();
-        head = tail = new Node(null, null);
+        head = tail = new Node(null);
     }
 
     public void enqueue(Object element) {
-        tail = tail.prev = new Node(element, head);
+        tail = tail.prev = new Node(element);
         size++;
     }
 
@@ -28,17 +28,16 @@ public class LinkedQueue extends AbstractQueue {
     }
 
     public void clear() {
-        head = tail = new Node(null, null);
+        head = tail = new Node(null);
         size = 0;
     }
 
-    private /*static ??? */ class Node {
+    private static class Node {
         private final Object value;  // final!!
         private Node prev;
 
-        private Node(Object value, Node prev) {
+        private Node(Object value) {
             this.value = value;
-            this.prev = prev;
         }
     }
 }

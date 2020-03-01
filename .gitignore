@@ -1,4 +1,4 @@
 */.idea/*
 */out/*
-!*.jar
+!*/out/production/*/*.jar
 */*.iml
