@@ -1,11 +1,15 @@
 package queue;
 
 public class ArrayQueue extends AbstractQueue {
-    private int head = 0, tail = 0;
-    private Object[] elements = new Object[2];
+    private int head, tail;
+    private Object[] elements;
 
-    public void enqueue(Object e) {
-        assert e != null;
+    public ArrayQueue() {
+        head = tail = 0;
+        elements = new Object[2];
+    }
+
+    public void push(Object e) {
         elements[tail] = e;
         tail = inc(tail);
         if (size() == elements.length) {
@@ -13,33 +17,17 @@ public class ArrayQueue extends AbstractQueue {
         }
     }
 
-    public Object dequeue() {
-        assert size() > 0;
-        Object result = elements[head];
+    public void pop() {
         elements[head] = null;
         head = inc(head);
-        return result;
     }
 
-    public Object element() {
-        assert size() > 0;
+    public Object head() {
         return elements[head];
     }
 
-    public int size() {
-        if (head == tail) {
-            return elements[head] == null ? 0 : elements.length;
-        }
-        return head > tail ? elements.length - (head - tail) : tail - head;
-    }
-
-    public boolean isEmpty() {
-        return size() == 0;
-    }
-
-    public void clear() {
-        head = 0;
-        tail = 0;
+    public void clearImpl() {
+        head = tail = 0;
         elements = new Object[2];
     }
 
@@ -52,11 +40,11 @@ public class ArrayQueue extends AbstractQueue {
         tail = elements.length / 2;
     }
 
-    private int inc(/*ArrayQueue this, */int a) {
+    private int inc(int a) {
         return (a + 1) % elements.length;
     }
 
-    private int dec(/*ArrayQueue this, */int a) {
+    private int dec(int a) {
         return (elements.length + a - 1) % elements.length;
     }
 }

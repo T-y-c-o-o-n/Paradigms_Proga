@@ -1,11 +1,35 @@
 package queue;
 
-import java.util.ArrayDeque;
-
 public abstract class AbstractQueue implements Queue {
-    protected int size;
+    private int size = 0;
 
-    protected AbstractQueue() { size = 0; }
+    protected abstract void push(Object e);
+
+    public void enqueue(Object e) {
+        assert e != null;
+
+        push(e);
+        size++;
+    }
+
+    protected abstract void pop();
+
+    public Object dequeue() {
+        assert size > 0;
+
+        Object result = head();
+        pop();
+        size--;
+        return result;
+    }
+
+    protected abstract Object head();
+
+    public Object element() {
+        assert size > 0;
+
+        return head();
+    }
 
     public int size() {
         return size;
@@ -13,5 +37,12 @@ public abstract class AbstractQueue implements Queue {
 
     public boolean isEmpty() {
         return size == 0;
+    }
+
+    protected abstract void clearImpl();
+
+    public void clear() {
+        clearImpl();
+        size = 0;
     }
 }
