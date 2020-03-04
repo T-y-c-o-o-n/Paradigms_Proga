@@ -3,7 +3,7 @@ package queue;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-interface Queue /*extends Iterable<Object>*/ {
+interface Queue extends Iterable<Object> {
     // INV:
     // Q = {e_first, e_2, e_3, ..., e_n-1, e_last}
     // e_i != null

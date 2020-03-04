@@ -1,6 +1,7 @@
 package queue;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -38,10 +39,10 @@ public class LinkedQueue extends AbstractQueue {
         }
         return result;
     }
-/*
+
     public Iterator<Object> iterator() {
-        return null;
-    }*/
+        return new LinkedQueueIterator();
+    }
 
     protected Queue getQueue() {
         return new LinkedQueue();
@@ -61,6 +62,16 @@ public class LinkedQueue extends AbstractQueue {
 
         private Node(Object value) {
             this.value = value;
+        }
+    }
+
+    private class LinkedQueueIterator extends AbstractQueueIterator {
+        private Node pnt = head;
+
+        @Override
+        protected Object nextImpl() {
+            pnt = pnt.prev;
+            return pnt.value;
         }
     }
 }

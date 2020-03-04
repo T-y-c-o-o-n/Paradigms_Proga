@@ -1,8 +1,10 @@
 package queue;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.Deque;
 
 public class ArrayQueue extends AbstractQueue {
     private int head, tail;
@@ -45,10 +47,10 @@ public class ArrayQueue extends AbstractQueue {
         }
         return result;
     }
-/*
+
     public Iterator<Object> iterator() {
-        return null;
-    }*/
+        return new ArrayQueueIterator();
+    }
 
     protected Queue getQueue() {
         return new ArrayQueue();
@@ -73,13 +75,14 @@ public class ArrayQueue extends AbstractQueue {
 
     private int inc(int a) {
         return (a + 1) % elements.length;
-    }/*
+    }
 
-    public class ArrayQueueIterator<Object> /*implements Iterator<Object> {
-        private final Object[] elems;
+    public class ArrayQueueIterator extends AbstractQueueIterator {
+        private int pnt = head;
 
-        public ArrayQueueIterator(ArrayQueue arrQ) {
-            elems = (Object[]) arrQ.toArray();
+        @Override
+        public Object nextImpl() {
+            return elements[pnt++];
         }
-    }*/
+    }
 }

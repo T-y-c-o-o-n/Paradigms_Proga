@@ -1,6 +1,7 @@
 package queue;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -24,6 +25,7 @@ public abstract class AbstractQueue implements Queue {
         Object result = head();
         dequeueImpl();
         size--;
+
         return result;
     }
 
@@ -52,20 +54,26 @@ public abstract class AbstractQueue implements Queue {
 
     public abstract Object[] toArray();
 
-    // public abstract Iterator<Object> iterator();
+    public abstract Iterator<Object> iterator();
 
     protected abstract Queue getQueue();
 
     public Queue filter(Predicate<Object> predicate) {
         assert predicate != null;
 
-        Object[] elements = toArray();
         Queue result = getQueue();
+        for (Object o : this) {
+            if (predicate.test(o)) {
+                result.enqueue(o);
+            }
+        }
+        /*Queue result = getQueue();
+        Object[] elements = toArray();
         for (Object e : elements) {
             if (predicate.test(e)) {
                 result.enqueue(e);
             }
-        }
+        }*/
 
         return result;
     }
@@ -73,12 +81,35 @@ public abstract class AbstractQueue implements Queue {
     public Queue map(Function<Object, Object> function) {
         assert function != null;
 
-        Object[] elements = toArray();
+
         Queue result = getQueue();
+        for (Object o : this) {
+            result.enqueue(function.apply(o));
+        }
+        /*Queue result = getQueue();
+        Object[] elements = toArray();
         for (Object e : elements) {
             result.enqueue(function.apply(e));
-        }
+        }*/
 
         return result;
+    }
+
+    protected abstract class AbstractQueueIterator implements Iterator<Object> {
+        private int left = AbstractQueue.this.size;
+
+        public boolean hasNext() {
+            return left > 0;
+        }
+
+        public Object next() {
+            if (left <= 0) {
+                throw new NoSuchElementException();
+            }
+            left--;
+            return nextImpl();
+        }
+
+        protected abstract Object nextImpl();
     }
 }
