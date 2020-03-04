@@ -8,8 +8,8 @@ public abstract class AbstractQueue implements Queue {
     public void enqueue(Object e) {
         assert e != null;
 
-        push(e);
         size++;
+        push(e);
     }
 
     protected abstract void pop();
@@ -18,8 +18,8 @@ public abstract class AbstractQueue implements Queue {
         assert size > 0;
 
         Object result = head();
-        pop();
         size--;
+        pop();
         return result;
     }
 
