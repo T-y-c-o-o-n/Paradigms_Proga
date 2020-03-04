@@ -1,5 +1,8 @@
 package queue;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 public class LinkedQueue extends AbstractQueue {
     private Node head, tail;
 
@@ -33,6 +36,14 @@ public class LinkedQueue extends AbstractQueue {
             result[i++] = temp.value;
         }
         return result;
+    }
+
+    public Queue filter(Predicate<Object> predicate) {
+        return null;
+    }
+
+    public Queue map(Function<Object, Object> function) {
+        return null;
     }
 
     private static class Node {

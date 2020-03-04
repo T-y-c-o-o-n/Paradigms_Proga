@@ -1,5 +1,8 @@
 package queue;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 interface Queue {
     // INV:
     // Q = {e_first, e_2, e_3, ..., e_n-1, e_last}
@@ -34,4 +37,12 @@ interface Queue {
     // Pre: true
     // Post: R = [e_first, e_2, ..., e_n-1, e_last]
     Object[] toArray();
+
+    // Pre: true
+    // Post: R = (Q = {e_i1, e_i2, ..., e_ik | e })
+    Queue filter(Predicate<Object> predicate);
+
+    // Pre: true
+    // Post: R = [e_first, e_2, ..., e_n-1, e_last]
+    Queue map(Function<Object, Object> function);
 }

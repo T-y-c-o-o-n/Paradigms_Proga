@@ -1,5 +1,8 @@
 package queue;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 public class ArrayQueue extends AbstractQueue {
     private int head, tail;
     private Object[] elements;
@@ -40,6 +43,14 @@ public class ArrayQueue extends AbstractQueue {
             System.arraycopy(elements, 0, result, elements.length - head, tail);
         }
         return result;
+    }
+
+    public Queue filter(Predicate<Object> predicate) {
+        return null;
+    }
+
+    public Queue map(Function<Object, Object> function) {
+        return null;
     }
 
     private void increaseCapacity() {

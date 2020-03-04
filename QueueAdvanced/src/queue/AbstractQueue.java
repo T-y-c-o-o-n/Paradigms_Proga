@@ -1,5 +1,8 @@
 package queue;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 public abstract class AbstractQueue implements Queue {
     private int size = 0;
 
@@ -47,4 +50,8 @@ public abstract class AbstractQueue implements Queue {
     }
 
     public abstract Object[] toArray();
+
+    public abstract Queue filter(Predicate<Object> predicate);
+
+    public abstract Queue map(Function<Object, Object> function);
 }
