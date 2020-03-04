@@ -30,4 +30,8 @@ interface Queue {
     // Pre: true
     // Post: |Q| == 0
     void clear();
+
+    // Pre: true
+    // Post: R = [e_first, e_2, ..., e_n-1, e_last]
+    Object[] toArray();
 }

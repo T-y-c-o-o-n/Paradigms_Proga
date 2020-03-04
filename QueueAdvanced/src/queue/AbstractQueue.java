@@ -3,22 +3,22 @@ package queue;
 public abstract class AbstractQueue implements Queue {
     private int size = 0;
 
-    protected abstract void push(Object e);
+    protected abstract void enqueueImpl(Object e);
 
     public void enqueue(Object e) {
         assert e != null;
 
-        push(e);
+        enqueueImpl(e);
         size++;
     }
 
-    protected abstract void pop();
+    protected abstract void dequeueImpl();
 
     public Object dequeue() {
         assert size > 0;
 
         Object result = head();
-        pop();
+        dequeueImpl();
         size--;
         return result;
     }
@@ -45,4 +45,6 @@ public abstract class AbstractQueue implements Queue {
         clearImpl();
         size = 0;
     }
+
+    public abstract Object[] toArray();
 }

@@ -8,11 +8,11 @@ public class LinkedQueue extends AbstractQueue {
         head = tail = new Node(null);
     }
 
-    public void push(Object element) {
+    public void enqueueImpl(Object element) {
         tail = tail.prev = new Node(element);
     }
 
-    public void pop() {
+    public void dequeueImpl() {
         head = head.prev;
     }
 
@@ -22,6 +22,17 @@ public class LinkedQueue extends AbstractQueue {
 
     public void clearImpl() {
         head = tail = new Node(null);
+    }
+
+    public Object[] toArray() {
+        Object[] result = new Object[size()];
+        int i = 0;
+        Node temp = head;
+        while (temp != tail) {
+            temp = temp.prev;
+            result[i++] = temp.value;
+        }
+        return result;
     }
 
     private static class Node {

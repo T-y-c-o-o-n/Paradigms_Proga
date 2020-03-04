@@ -9,7 +9,7 @@ public class ArrayQueue extends AbstractQueue {
         elements = new Object[2];
     }
 
-    public void push(Object e) {
+    public void enqueueImpl(Object e) {
         if (size() == elements.length) {
             increaseCapacity();
         }
@@ -17,7 +17,7 @@ public class ArrayQueue extends AbstractQueue {
         tail = inc(tail);
     }
 
-    public void pop() {
+    public void dequeueImpl() {
         elements[head] = null;
         head = inc(head);
     }
@@ -29,6 +29,17 @@ public class ArrayQueue extends AbstractQueue {
     public void clearImpl() {
         head = tail = 0;
         elements = new Object[2];
+    }
+
+    public Object[] toArray() {
+        Object[] result = new Object[size()];
+        if (head < tail || head == tail && elements[head] == null) {
+            System.arraycopy(elements, head, result, 0, tail - head);
+        } else {
+            System.arraycopy(elements, head, result, 0, elements.length - head);
+            System.arraycopy(elements, 0, result, elements.length - head, tail);
+        }
+        return result;
     }
 
     private void increaseCapacity() {
