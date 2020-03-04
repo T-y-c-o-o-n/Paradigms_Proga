@@ -32,10 +32,10 @@ public class LinkedQueue extends AbstractQueue {
     public Object[] toArray() {
         Object[] result = new Object[size()];
         int i = 0;
-        Node temp = head;
-        while (temp != tail) {
-            temp = temp.prev;
-            result[i++] = temp.value;
+        Node pnt = head;
+        while (pnt != tail) {
+            pnt = pnt.prev;
+            result[i++] = pnt.value;
         }
         return result;
     }
@@ -47,14 +47,28 @@ public class LinkedQueue extends AbstractQueue {
     protected Queue getQueue() {
         return new LinkedQueue();
     }
-
+/*
     public Queue filter(Predicate<Object> predicate) {
-        return null;
+        Queue result = new LinkedQueue();
+        Node pnt = head;
+        while (pnt != tail) {
+            pnt = pnt.prev;
+            if (predicate.test(pnt.value)) {
+                result.enqueue(pnt.value);
+            }
+        }
+        return result;
     }
 
     public Queue map(Function<Object, Object> function) {
-        return null;
-    }
+        Queue result = new LinkedQueue();
+        Node pnt = head;
+        while (pnt != tail) {
+            pnt = pnt.prev;
+            result.enqueue(function.apply(pnt.value));
+        }
+        return result;
+    }*/
 
     private static class Node {
         private final Object value;  // final!!

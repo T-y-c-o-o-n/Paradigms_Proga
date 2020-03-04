@@ -55,14 +55,24 @@ public class ArrayQueue extends AbstractQueue {
     protected Queue getQueue() {
         return new ArrayQueue();
     }
-
+/*
     public Queue filter(Predicate<Object> predicate) {
-        return null;
+        Queue result = new ArrayQueue();
+        for (int pnt = head; pnt < tail; pnt = inc(pnt)) {
+            if (predicate.test(elements[pnt])) {
+                result.enqueue(elements[pnt]);
+            }
+        }
+        return result;
     }
 
     public Queue map(Function<Object, Object> function) {
-        return null;
-    }
+        Queue result = new ArrayQueue();
+        for (int pnt = head; pnt < tail; pnt = inc(pnt)) {
+            result.enqueue(function.apply(elements[pnt]));
+        }
+        return result;
+    }*/
 
     private void increaseCapacity() {
         Object[] increased = new Object[elements.length * 2];
