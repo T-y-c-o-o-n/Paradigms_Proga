@@ -1,5 +1,6 @@
 package queue;
 
+import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -51,7 +52,33 @@ public abstract class AbstractQueue implements Queue {
 
     public abstract Object[] toArray();
 
-    public abstract Queue filter(Predicate<Object> predicate);
+    // public abstract Iterator<Object> iterator();
 
-    public abstract Queue map(Function<Object, Object> function);
+    protected abstract Queue getQueue();
+
+    public Queue filter(Predicate<Object> predicate) {
+        assert predicate != null;
+
+        Object[] elements = toArray();
+        Queue result = getQueue();
+        for (Object e : elements) {
+            if (predicate.test(e)) {
+                result.enqueue(e);
+            }
+        }
+
+        return result;
+    }
+
+    public Queue map(Function<Object, Object> function) {
+        assert function != null;
+
+        Object[] elements = toArray();
+        Queue result = getQueue();
+        for (Object e : elements) {
+            result.enqueue(function.apply(e));
+        }
+
+        return result;
+    }
 }

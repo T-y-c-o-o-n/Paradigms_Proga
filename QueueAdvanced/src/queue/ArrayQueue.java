@@ -1,5 +1,6 @@
 package queue;
 
+import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -44,6 +45,14 @@ public class ArrayQueue extends AbstractQueue {
         }
         return result;
     }
+/*
+    public Iterator<Object> iterator() {
+        return null;
+    }*/
+
+    protected Queue getQueue() {
+        return new ArrayQueue();
+    }
 
     public Queue filter(Predicate<Object> predicate) {
         return null;
@@ -64,9 +73,13 @@ public class ArrayQueue extends AbstractQueue {
 
     private int inc(int a) {
         return (a + 1) % elements.length;
-    }
+    }/*
 
-    private int dec(int a) {
-        return (elements.length + a - 1) % elements.length;
-    }
+    public class ArrayQueueIterator<Object> /*implements Iterator<Object> {
+        private final Object[] elems;
+
+        public ArrayQueueIterator(ArrayQueue arrQ) {
+            elems = (Object[]) arrQ.toArray();
+        }
+    }*/
 }

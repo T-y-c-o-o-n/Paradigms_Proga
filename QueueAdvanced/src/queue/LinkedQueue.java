@@ -1,5 +1,6 @@
 package queue;
 
+import java.util.Iterator;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -36,6 +37,14 @@ public class LinkedQueue extends AbstractQueue {
             result[i++] = temp.value;
         }
         return result;
+    }
+/*
+    public Iterator<Object> iterator() {
+        return null;
+    }*/
+
+    protected Queue getQueue() {
+        return new LinkedQueue();
     }
 
     public Queue filter(Predicate<Object> predicate) {

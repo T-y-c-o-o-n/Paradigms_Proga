@@ -3,7 +3,7 @@ package queue;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-interface Queue {
+interface Queue /*extends Iterable<Object>*/ {
     // INV:
     // Q = {e_first, e_2, e_3, ..., e_n-1, e_last}
     // e_i != null
@@ -38,11 +38,11 @@ interface Queue {
     // Post: R = [e_first, e_2, ..., e_n-1, e_last]
     Object[] toArray();
 
-    // Pre: true
-    // Post: R = (Q = {e_i1, e_i2, ..., e_ik | e })
+    // Pre: predicate != null
+    // Post: R = ( Q = {e_i1, e_i2, ..., e_ik  |  predicate(e) == true } )
     Queue filter(Predicate<Object> predicate);
 
-    // Pre: true
-    // Post: R = [e_first, e_2, ..., e_n-1, e_last]
+    // Pre: fun != null
+    // Post: R = ( Q = {fun(e_i1), fun(e_i2), ..., fun(e_ik)} )
     Queue map(Function<Object, Object> function);
 }
