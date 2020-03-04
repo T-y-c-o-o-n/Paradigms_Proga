@@ -1,10 +1,11 @@
 package expression;
 
 import expression.binary.CheckedPow;
+import expression.exceptions.ParsingException;
 import expression.parser.*;
 
 public class Main {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws ParsingException {
 		int z=-1538579178;
 		System.out.println(Math.abs(-7));
 		//System.out.println(new Digits(new Const(Integer.MIN_VALUE)).evaluate(1, 1, 1));
@@ -12,6 +13,7 @@ public class Main {
 
 		Parser parser = new ExpressionParser();
 		System.out.println("PARSER:\n");
+		System.out.println(parser.parse("5--5").toString());
 		System.out.println(parser.parse("log2 (22323)").toString());
 		System.out.println(parser.parse("log2 4").toString());
 		System.out.println(parser.parse("log2 8").toString());

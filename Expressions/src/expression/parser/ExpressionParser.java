@@ -2,16 +2,29 @@ package expression.parser;
 
 import expression.*;
 import expression.binary.*;
+import expression.exceptions.BracketException;
 import expression.exceptions.ConstException;
 import expression.exceptions.ParsingException;
 import expression.unary.*;
 
+import java.util.Map;
+import java.util.function.Function;
+
 public class ExpressionParser implements Parser {
-    public CommonExpression parse(Source source) {
+    public static Map<String, Function<CommonExpression, CommonExpression>> getUnarOper = Map.of(
+            "abs", Abs::new,
+            "square", Square::new,
+            "digits", Digits::new,
+            "reverse", Reverse::new,
+            "log2", CheckedLog2::new,
+            "pow2", CheckedPow2::new
+    );
+
+    public CommonExpression parse(Source source) throws ParsingException {
         return new ExpressionParser1(source).parse(0);
     }
 
-    public CommonExpression parse(String string) {
+    public CommonExpression parse(String string) throws ParsingException {
         return parse(new StringSource(string));
     }
 
@@ -25,14 +38,18 @@ public class ExpressionParser implements Parser {
             oper = Oper.NAN;
         }
 
-        private CommonExpression parse(int priority) {
+        private CommonExpression parse(int priority) throws ParsingException {
             oper = Oper.NAN;
             skipWhitespace();
             if (priority == 4) {
                 return parseUnarOper();
             }
             CommonExpression argLeft;
-            argLeft = parse(priority + 1);
+            //try {
+                argLeft = parse(priority + 1);
+            //} catch (ParsingException e) {
+            //    throw new ParsingException("no first argument");
+            //}
             while (true) {
                 skipWhitespace();
                 if (oper == Oper.NAN) {
@@ -40,7 +57,7 @@ public class ExpressionParser implements Parser {
                         return argLeft;
                     } else if (isCloseBracket()) {
                         if (balance == 0) {
-                            throw new ParsingException("no opening bracket");
+                            throw new BracketException("no opening bracket", pos, getPre(), getPost());
                         }
                         return argLeft;
                     } else if (test('>')) {
@@ -66,7 +83,8 @@ public class ExpressionParser implements Parser {
                             oper = Oper.DIV;
                         }
                     } else {
-                        throw new ParsingException("unexpected binary operation");
+                        throw new ParsingException("unexpected binary operation, but found: " + getChar(),
+                                pos, getPre(), getPost());
                     }
                 }
                 if (oper.getPriority() != priority) {
@@ -84,7 +102,8 @@ public class ExpressionParser implements Parser {
             }
         }
 
-        private CommonExpression parseBinarOper(CommonExpression argLeft, Oper tempOper, CommonExpression argRight) {
+        private CommonExpression parseBinarOper(CommonExpression argLeft, Oper tempOper,
+                                                CommonExpression argRight) throws ParsingException {
             switch (tempOper) {
                 case RSH:
                     return new RightShift(argLeft, argRight);
@@ -103,11 +122,11 @@ public class ExpressionParser implements Parser {
                 case LOG:
                     return new CheckedLog(argLeft, argRight);
                 default:
-                    throw new ParsingException("unsupported operation");
+                    throw new ParsingException("unsupported operation", pos, getPre(), getPost());
             }
         }
 
-        private CommonExpression parseUnarOper() {
+        private CommonExpression parseUnarOper() throws ParsingException {
             skipWhitespace();
             if (isDigit()) {
                 return parseConst(true);
@@ -127,7 +146,11 @@ public class ExpressionParser implements Parser {
                 balance++;
                 CommonExpression parsed = parse(0);
                 skipWhitespace();
-                expect (')');
+                try {
+                    expect(')');
+                } catch (ParsingException e) {
+                    throw new BracketException("no close bracket", pos, getPre(), getPost());
+                }
                 balance--;
                 return parsed;
             }
@@ -136,13 +159,15 @@ public class ExpressionParser implements Parser {
                 sb.append(getChar());
             }
             skipWhitespace();
-            if (Oper.getUnarOper.get(sb.toString()) != null) {
-                return Oper.getUnarExp(sb.toString(), parseUnarOper());
+
+            Function<CommonExpression, CommonExpression> constructor = getUnarOper.get(sb.toString());
+            if (constructor != null) {
+                return constructor.apply(parse(0));
             }
-            throw new ParsingException("expected const, variable or unary operation");
+            throw new ParsingException("expected const, variable or unary operation", pos, getPre(), getPost());
         }
 
-        private CommonExpression parseConst(boolean positive) {
+        private CommonExpression parseConst(boolean positive) throws ParsingException {
             StringBuilder sb = new StringBuilder();
             if (!positive) {
                 sb.append('-');
@@ -152,13 +177,13 @@ public class ExpressionParser implements Parser {
             } while (isDigit());
             skipWhitespace();
             if (isDigit()) {
-                throw new ConstException("Spaces in number");
+                throw new ConstException("Spaces in number: " + sb.toString() + " " + getChar());
             }
             int val;
             try {
                 val = Integer.parseInt(sb.toString());
             } catch (NumberFormatException e) {
-                throw new ConstException("overflow " + e.getMessage());
+                throw new ConstException("overflow: " + sb.toString());
             }
             return new Const(val);
         }
@@ -167,6 +192,5 @@ public class ExpressionParser implements Parser {
             String var = String.valueOf(getChar());
             return new Variable(var);
         }
-
     }
 }

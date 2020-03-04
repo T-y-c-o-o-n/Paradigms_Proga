@@ -1,6 +1,7 @@
 package expression;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import expression.exceptions.ParsingException;
 import expression.unary.*;
@@ -22,32 +23,6 @@ public enum Oper {
     DIG("digits ", 4),
     REV("reverse ", 4),
     NAN(" NaN ", -1);
-
-    public static Map<String, Oper> getUnarOper = Map.of(
-            "abs", Oper.ABS,
-            "square", Oper.SQR,
-            "digits", Oper.DIG,
-            "reverse", Oper.REV,
-            "log2", Oper.LOG2,
-            "pow2", Oper.POW2
-    );
-    public static CommonExpression getUnarExp(String token, CommonExpression arg) {
-        switch (token) {
-            case "abs":
-                return new Abs(arg);
-            case "square":
-                return new Square(arg);
-            case "digits":
-                return new Digits(arg);
-            case "reverse":
-                return new Reverse(arg);
-            case "log2":
-                return new CheckedLog2(arg);
-            case "pow2":
-                return new CheckedPow2(arg);
-        }
-        throw new ParsingException("invalid unary operation");
-    }
 
     private String view;
     private int priority;

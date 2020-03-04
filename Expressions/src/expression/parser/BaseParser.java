@@ -1,17 +1,45 @@
 package expression.parser;
 
 import expression.exceptions.ParsingException;
+import java.util.Queue;
+import java.util.LinkedList;
 
 public abstract class BaseParser {
     private final Source source;
     protected char tempCh;
+    protected int pos;
+    private Queue<Character> tempQueue;
 
     protected BaseParser(Source source) {
         this.source = source;
+        pos = 0;
+        tempQueue = new LinkedList<>();
+    }
+
+    protected String getPre() {
+        StringBuilder sb = new StringBuilder();
+        while (!tempQueue.isEmpty()) {
+            sb.append(tempQueue.remove());
+        }
+        return sb.toString();
+    }
+
+    protected String getPost() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 20 && (tempCh != '\0'); ++i) {
+            nextChar();
+            sb.append(tempCh);
+        }
+        return sb.toString();
     }
 
     protected void nextChar() {
         tempCh = source.nextChar();
+        pos++;
+        tempQueue.add(tempCh);
+        if (tempQueue.size() >= 20) {
+            tempQueue.remove();
+        }
     }
 
     protected char getChar() {
@@ -28,14 +56,14 @@ public abstract class BaseParser {
         return false;
     }
 
-    protected void expect(char ch)  {
+    protected void expect(char ch) throws ParsingException {
         if (ch != tempCh) {
             throw new ParsingException("expected: '" + ch + "' , but found: " + tempCh);
         }
         nextChar();
     }
 
-    protected void expect(String expected) {
+    protected void expect(String expected) throws ParsingException {
         for (char ch : expected.toCharArray()) {
             expect(ch);
         }
