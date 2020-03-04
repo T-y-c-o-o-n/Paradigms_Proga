@@ -52,11 +52,11 @@ public class ArrayQueue extends AbstractQueue {
         tail = elements.length / 2;
     }
 
-    private int inc(/*ArrayQueue this, */int a) {
+    private int inc(int a) {
         return (a + 1) % elements.length;
     }
 
-    private int dec(/*ArrayQueue this, */int a) {
+    private int dec(int a) {
         return (elements.length + a - 1) % elements.length;
     }
 }
