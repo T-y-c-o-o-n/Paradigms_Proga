@@ -10,11 +10,11 @@ public class ArrayQueue extends AbstractQueue {
     }
 
     public void push(Object e) {
-        elements[tail] = e;
-        tail = inc(tail);
         if (size() == elements.length) {
             increaseCapacity();
         }
+        elements[tail] = e;
+        tail = inc(tail);
     }
 
     public void pop() {
