@@ -8,28 +8,20 @@ public class LinkedQueue extends AbstractQueue {
         head = tail = new Node(null);
     }
 
-    public void enqueue(Object element) {
+    public void push(Object element) {
         tail = tail.prev = new Node(element);
-        size++;
     }
 
-    public Object dequeue() {
-        assert size > 0;
-
+    public void pop() {
         head = head.prev;
-        size--;
-        return head.value;
     }
 
-    public Object element() {
-        assert size > 0;
-
+    public Object head() {
         return head.prev.value;
     }
 
-    public void clear() {
+    public void clearImpl() {
         head = tail = new Node(null);
-        size = 0;
     }
 
     private static class Node {
