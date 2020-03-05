@@ -11,7 +11,7 @@ public class ArrayQueue extends AbstractQueue {
         elements = new Object[2];
     }
 
-    public void enqueueImpl(Object e) {
+    protected void enqueueImpl(Object e) {
         if (size() == elements.length) {
             increaseCapacity();
         }
@@ -19,16 +19,16 @@ public class ArrayQueue extends AbstractQueue {
         tail = inc(tail);
     }
 
-    public void dequeueImpl() {
+    protected void dequeueImpl() {
         elements[head] = null;
         head = inc(head);
     }
 
-    public Object head() {
+    protected Object head() {
         return elements[head];
     }
 
-    public void clearImpl() {
+    protected void clearImpl() {
         head = tail = 0;
         elements = new Object[2];
     }

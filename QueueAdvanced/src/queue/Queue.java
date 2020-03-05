@@ -39,10 +39,10 @@ interface Queue extends Iterable<Object> {
     Object[] toArray();
 
     // Pre: predicate != null
-    // Post: R = ( Q = {e_i1, e_i2, ..., e_ik  |  predicate(e) == true } )
+    // Post: R = ( Q = {e_i1, e_i2, ..., e_ik  |  predicate(e_i_j) == true } )
     Queue filter(Predicate<Object> predicate);
 
-    // Pre: fun != null
+    // Pre: fun != null && Res of Fun != null
     // Post: R = ( Q = {fun(e_i1), fun(e_i2), ..., fun(e_ik)} )
     Queue map(Function<Object, Object> function);
 }

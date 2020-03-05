@@ -13,19 +13,19 @@ public class LinkedQueue extends AbstractQueue {
         head = tail = new Node(null);
     }
 
-    public void enqueueImpl(Object element) {
+    protected void enqueueImpl(Object element) {
         tail = tail.prev = new Node(element);
     }
 
-    public void dequeueImpl() {
+    protected void dequeueImpl() {
         head = head.prev;
     }
 
-    public Object head() {
+    protected Object head() {
         return head.prev.value;
     }
 
-    public void clearImpl() {
+    protected void clearImpl() {
         head = tail = new Node(null);
     }
 
