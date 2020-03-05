@@ -67,31 +67,16 @@ public abstract class AbstractQueue implements Queue {
                 result.enqueue(o);
             }
         }
-        /*Queue result = getQueue();
-        Object[] elements = toArray();
-        for (Object e : elements) {
-            if (predicate.test(e)) {
-                result.enqueue(e);
-            }
-        }*/
-
         return result;
     }
 
     public Queue map(Function<Object, Object> function) {
         assert function != null;
 
-
         Queue result = getQueue();
         for (Object o : this) {
             result.enqueue(function.apply(o));
         }
-        /*Queue result = getQueue();
-        Object[] elements = toArray();
-        for (Object e : elements) {
-            result.enqueue(function.apply(e));
-        }*/
-
         return result;
     }
 

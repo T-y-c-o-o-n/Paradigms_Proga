@@ -1,10 +1,6 @@
 package queue;
 
 import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.Deque;
 
 public class ArrayQueue extends AbstractQueue {
     private int head, tail;
@@ -55,24 +51,6 @@ public class ArrayQueue extends AbstractQueue {
     protected Queue getQueue() {
         return new ArrayQueue();
     }
-/*
-    public Queue filter(Predicate<Object> predicate) {
-        Queue result = new ArrayQueue();
-        for (int pnt = head; pnt < tail; pnt = inc(pnt)) {
-            if (predicate.test(elements[pnt])) {
-                result.enqueue(elements[pnt]);
-            }
-        }
-        return result;
-    }
-
-    public Queue map(Function<Object, Object> function) {
-        Queue result = new ArrayQueue();
-        for (int pnt = head; pnt < tail; pnt = inc(pnt)) {
-            result.enqueue(function.apply(elements[pnt]));
-        }
-        return result;
-    }*/
 
     private void increaseCapacity() {
         Object[] increased = new Object[elements.length * 2];
@@ -88,11 +66,12 @@ public class ArrayQueue extends AbstractQueue {
     }
 
     public class ArrayQueueIterator extends AbstractQueueIterator {
-        private int pnt = head;
+        private int pnt = (elements.length + head - 1) % elements.length;
 
         @Override
         public Object nextImpl() {
-            return elements[pnt++];
+            pnt = inc(pnt);
+            return elements[pnt];
         }
     }
 }

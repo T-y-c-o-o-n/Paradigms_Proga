@@ -47,28 +47,6 @@ public class LinkedQueue extends AbstractQueue {
     protected Queue getQueue() {
         return new LinkedQueue();
     }
-/*
-    public Queue filter(Predicate<Object> predicate) {
-        Queue result = new LinkedQueue();
-        Node pnt = head;
-        while (pnt != tail) {
-            pnt = pnt.prev;
-            if (predicate.test(pnt.value)) {
-                result.enqueue(pnt.value);
-            }
-        }
-        return result;
-    }
-
-    public Queue map(Function<Object, Object> function) {
-        Queue result = new LinkedQueue();
-        Node pnt = head;
-        while (pnt != tail) {
-            pnt = pnt.prev;
-            result.enqueue(function.apply(pnt.value));
-        }
-        return result;
-    }*/
 
     private static class Node {
         private final Object value;  // final!!
