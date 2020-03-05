@@ -34,12 +34,12 @@ public abstract class BaseParser {
     }
 
     protected void nextChar() {
-        tempCh = source.nextChar();
-        pos++;
         tempQueue.add(tempCh);
         if (tempQueue.size() >= 20) {
             tempQueue.remove();
         }
+        tempCh = source.nextChar();
+        pos++;
     }
 
     protected char getChar() {

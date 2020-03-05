@@ -10,6 +10,10 @@ public class ParsingException extends Exception {
     }
 
     public ParsingException(String message, int pos, String pre, String post) {
-        super(message + " on position " + pos + ":   \".....   " + pre + " HERE " + post + "   .....\"");
+        super(message + ":   \".....   " + pre + " HERE " + post + "   .....\"");
+    }
+
+    public ParsingException(String message, int pos, String pre, char ch, String post) {
+        super(message + " on position " + pos + ":    " + pre + " error -------> " + ch + " <------- error " + post);
     }
 }

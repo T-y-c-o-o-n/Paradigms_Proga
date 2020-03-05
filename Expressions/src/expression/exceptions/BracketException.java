@@ -9,7 +9,11 @@ public class BracketException extends ParsingException {
         super(message, pos);
     }
 
-    public BracketException(String message, int pos, String pre, String post) {
-        super(message, pos, pre, post);
+    public BracketException(String message, String pre, String post) {
+        super(message + pre + post);
     }
+/*
+    public BracketException(String message, int pos, String pre, char ch, String post) {
+        super(message, pos, pre, ch, post);
+    }*/
 }

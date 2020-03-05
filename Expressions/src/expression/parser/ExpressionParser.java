@@ -21,18 +21,18 @@ public class ExpressionParser implements Parser {
     );
 
     public CommonExpression parse(Source source) throws ParsingException {
-        return new ExpressionParser1(source).parse(0);
+        return new Parser(source).parse(0);
     }
 
     public CommonExpression parse(String string) throws ParsingException {
         return parse(new StringSource(string));
     }
 
-    private static class ExpressionParser1 extends BaseParser {
+    private static class Parser extends BaseParser {
         private int balance = 0;
         public Oper oper;
 
-        public ExpressionParser1(Source source) {
+        public Parser(Source source) {
             super(source);
             nextChar();
             oper = Oper.NAN;
@@ -45,11 +45,7 @@ public class ExpressionParser implements Parser {
                 return parseUnarOper();
             }
             CommonExpression argLeft;
-            //try {
-                argLeft = parse(priority + 1);
-            //} catch (ParsingException e) {
-            //    throw new ParsingException("no first argument");
-            //}
+            argLeft = parse(priority + 1);
             while (true) {
                 skipWhitespace();
                 if (oper == Oper.NAN) {
@@ -57,7 +53,7 @@ public class ExpressionParser implements Parser {
                         return argLeft;
                     } else if (isCloseBracket()) {
                         if (balance == 0) {
-                            throw new BracketException("no opening bracket", pos, getPre(), getPost());
+                            throw new BracketException("no opening bracket: ", getPre(), getPost());
                         }
                         return argLeft;
                     } else if (test('>')) {
@@ -83,8 +79,8 @@ public class ExpressionParser implements Parser {
                             oper = Oper.DIV;
                         }
                     } else {
-                        throw new ParsingException("unexpected binary operation, but found: " + getChar(),
-                                pos, getPre(), getPost());
+                        throw new ParsingException("unexpected binary operation: ",
+                                pos, getPre(), getChar(), getPost());
                     }
                 }
                 if (oper.getPriority() != priority) {
@@ -93,11 +89,7 @@ public class ExpressionParser implements Parser {
                 Oper savedOper = oper;
                 CommonExpression argRight;
                 oper = Oper.NAN;
-                //try {
-                    argRight = parse(priority + 1);
-                //} catch (ParsingException e) {
-                //    throw new ParsingException("no second argument");
-                //}
+                argRight = parse(priority + 1);
                 argLeft = parseBinarOper(argLeft, savedOper, argRight);
             }
         }
@@ -122,7 +114,7 @@ public class ExpressionParser implements Parser {
                 case LOG:
                     return new CheckedLog(argLeft, argRight);
                 default:
-                    throw new ParsingException("unsupported operation", pos, getPre(), getPost());
+                    throw new ParsingException("unsupported operation", pos, getPre(), getChar(), getPost());
             }
         }
 
@@ -149,7 +141,7 @@ public class ExpressionParser implements Parser {
                 try {
                     expect(')');
                 } catch (ParsingException e) {
-                    throw new BracketException("no close bracket", pos, getPre(), getPost());
+                    throw new BracketException("no close bracket: ", getPre(), getPost());
                 }
                 balance--;
                 return parsed;
@@ -158,13 +150,18 @@ public class ExpressionParser implements Parser {
             while (isLetter() || isDigit()) {
                 sb.append(getChar());
             }
+            if (sb.length() == 0) {
+                String pre = getPre();
+                throw new ParsingException("expected const, variable or unary operation, but found : '"
+                        + getChar() + "'", pos, pre, getPost());
+            }
             skipWhitespace();
 
             Function<CommonExpression, CommonExpression> constructor = getUnarOper.get(sb.toString());
             if (constructor != null) {
-                return constructor.apply(parse(0));
+                return constructor.apply(parse(4));
             }
-            throw new ParsingException("expected const, variable or unary operation", pos, getPre(), getPost());
+            throw new ParsingException("illegal unary operation: " + sb.toString());
         }
 
         private CommonExpression parseConst(boolean positive) throws ParsingException {
