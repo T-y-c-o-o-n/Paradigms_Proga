@@ -2,18 +2,14 @@ package expression;
 
 import java.util.EnumSet;
 
-public class Const<T extends Number> implements CommonExpression<T> {
+public class Const<T> implements CommonExpression<T> {
     private final T val;
 
     public Const(T val) {
         this.val = val;
     }
 
-    public Number getVal() {
-        return val;
-    }
-
-    public T evaluate(int x, int y, int z) {
+    public T evaluate(T x, T y, T z) {
         return val;
     }
 
@@ -27,18 +23,5 @@ public class Const<T extends Number> implements CommonExpression<T> {
 
     public String checkString(EnumSet<Oper> allowed) {
         return toString();
-    }
-
-    public boolean equals(Object object) {
-        if (object != null && object.getClass() == getClass()) {
-            Const<T> c = (Const<T>)object;
-            return val.equals(c.getVal());
-        } else {
-            return false;
-        }
-    }
-
-    public int hashCode() {
-        return val.hashCode();
     }
 }

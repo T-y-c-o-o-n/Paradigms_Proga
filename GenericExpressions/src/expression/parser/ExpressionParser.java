@@ -7,49 +7,41 @@ import expression.exceptions.ConstException;
 import expression.exceptions.ParsingException;
 import expression.unary.*;
 
-import java.util.Map;
-import java.util.function.BiFunction;
-
-public class ExpressionParser<T extends Number> implements Parser<T> {
-    public CommonExpression<T> parse(Source source) throws ParsingException {
-        return new Parser<T>(source).parse(0);
+public class ExpressionParser<T> implements Parser<T> {
+    public CommonExpression<T> parse(Source source, Computer<T> example) throws ParsingException {
+        return new Parser<>(source, example).parse(0);
     }
 
-    public CommonExpression<T> parse(Source source, String mode) throws ParsingException {
-        return new Parser<T>(source).parse(0);
+    public CommonExpression<T> parse(Source source) throws ParsingException {
+        return parse(source, (Computer<T>) new IntComputer());
     }
 
     public CommonExpression<T> parse(String string) throws ParsingException {
         return parse(new StringSource(string));
     }
 
-    public CommonExpression<T> parse(String string, String mode) throws ParsingException {
-        return parse(new StringSource(string), mode);
+    public CommonExpression<T> parse(String string, Computer<T> example) throws ParsingException {
+        return parse(new StringSource(string), example);
     }
 
-    private static class Parser<T extends Number> extends BaseParser {
-        private final Map<Oper, BiFunction<CommonExpression<T>,CommonExpression<T>, CommonExpression<T>>> getBinarOper
-                = Map.of(
-                Oper.ADD, CheckedAdd<T>::new,
-                Oper.SUB, CheckedSubtract<T>::new,
-                Oper.MUL, CheckedMultiply<T>::new,
-                Oper.DIV, CheckedDivide<T>::new
-        );
-
-        private int balance = 0;
+    private static class Parser<T> extends BaseParser {
+        private int balance;
         private Oper oper;
+        private final Computer<T> example;
 
-        public Parser(Source source) {
+        public Parser(Source source, Computer<T> example) {
             super(source);
-            nextChar();
+            balance = 0;
             oper = Oper.NAN;
+            this.example = example;
+            nextChar();
         }
 
         private CommonExpression<T> parse(int priority) throws ParsingException {
             oper = Oper.NAN;
             skipWhitespace();
             if (priority == 4) {
-                return parseUnarOper();
+                return parseUnaryOper();
             }
             CommonExpression<T> argLeft;
             argLeft = parse(priority + 1);
@@ -63,28 +55,14 @@ public class ExpressionParser<T extends Number> implements Parser<T> {
                             throw new BracketException("no opening bracket: ", getPre(), getPost());
                         }
                         return argLeft;
-                    } else if (test('>')) {
-                        expect('>');
-                        oper = Oper.RSH;
-                    } else if (test('<')) {
-                        expect('<');
-                        oper = Oper.LSH;
                     } else if (test('+')) {
                         oper = Oper.ADD;
                     } else if (test('-')) {
                         oper = Oper.SUB;
                     } else if (test('*')) {
-                        if (test('*')) {
-                            oper = Oper.POW;
-                        } else {
-                            oper = Oper.MUL;
-                        }
+                        oper = Oper.MUL;
                     } else if (test('/')) {
-                        if (test('/')) {
-                            oper = Oper.LOG;
-                        } else {
-                            oper = Oper.DIV;
-                        }
+                        oper = Oper.DIV;
                     } else {
                         throw new ParsingException("unexpected binary operation: ",
                                 pos, getPre(), getChar(), getPost());
@@ -97,11 +75,21 @@ public class ExpressionParser<T extends Number> implements Parser<T> {
                 CommonExpression<T> argRight;
                 oper = Oper.NAN;
                 argRight = parse(priority + 1);
-                argLeft = getBinarOper.get(savedOper).apply(argLeft, argRight);
+                argLeft = makeBinaryOper(savedOper, argLeft, argRight);
             }
         }
 
-        private CommonExpression<T> parseUnarOper() throws ParsingException {
+        private CommonExpression<T> makeBinaryOper(Oper me, CommonExpression<T> arg1, CommonExpression<T> arg2) {
+            switch (me) {
+                case ADD: return new Add<>(arg1, arg2, example);
+                case SUB: return new Subtract<>(arg1, arg2, example);
+                case MUL: return new Multiply<>(arg1, arg2, example);
+                case DIV: return new Divide<>(arg1, arg2, example);
+                default: return null;
+            }
+        }
+
+        private CommonExpression<T> parseUnaryOper() throws ParsingException {
             skipWhitespace();
             if (isDigit()) {
                 return parseConst(true);
@@ -114,7 +102,7 @@ public class ExpressionParser<T extends Number> implements Parser<T> {
                 if (isDigit()) {
                     return parseConst(false);
                 } else {
-                    return new CheckedNegate<T>(parseUnarOper());
+                    return new Negate<>(parseUnaryOper(), example);
                 }
             }
             if (test('(')) {
@@ -129,7 +117,6 @@ public class ExpressionParser<T extends Number> implements Parser<T> {
                 balance--;
                 return parsed;
             }
-            StringBuilder sb = new StringBuilder();
             throw new ParsingException("expected const, variable or unary operation, but found : '"
                         + getChar() + "'", pos, getPre(), getPost());
         }
@@ -146,18 +133,12 @@ public class ExpressionParser<T extends Number> implements Parser<T> {
             if (isDigit()) {
                 throw new ConstException("Spaces in number: " + sb.toString() + " " + getChar());
             }
-//            int val;
-//            try {
-//                val = Integer.parseInt(sb.toString());
-//            } catch (NumberFormatException e) {
-//                throw new ConstException("overflow: " + sb.toString());
-//            }
-            return new Const<T>(getNumber.get(type).apply(sb.toString()));
+            return new Const<>(example.parseVal(sb.toString()));
         }
 
         private CommonExpression<T> parseVar() {
             String var = String.valueOf(getChar());
-            return new Variable<T>(var);
+            return new Variable<>(var);
         }
     }
 }

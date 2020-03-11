@@ -2,7 +2,7 @@ package expression;
 
 import java.util.EnumSet;
 
-public class Variable<T extends Number> implements CommonExpression<T> {
+public class Variable<T> implements CommonExpression<T> {
     private final String variable;
 
     public Variable(String variable) {
@@ -13,13 +13,13 @@ public class Variable<T extends Number> implements CommonExpression<T> {
         return variable;
     }
 
-    public T evaluate(int x, int y, int z) {
+    public T evaluate(T x, T y, T z) {
         if (variable.equals("x")) {
-            return (T) new Integer(y);
+            return x;
         } else if (variable.equals("y")) {
-            return (T) new Integer(y);
+            return y;
         } else {
-            return (T) new Integer(z);
+            return z;
         }
     }
 
@@ -33,18 +33,5 @@ public class Variable<T extends Number> implements CommonExpression<T> {
 
     public String checkString(EnumSet<Oper> allowed) {
         return toString();
-    }
-
-    public boolean equals(Object object) {
-        if (object != null && object.getClass() == getClass()) {
-            Variable v = (Variable)object;
-            return variable.equals(v.getVar());
-        } else {
-            return false;
-        }
-    }
-
-    public int hashCode() {
-        return variable.hashCode();
     }
 }

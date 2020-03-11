@@ -4,40 +4,24 @@ import expression.exceptions.OverflowException;
 
 import java.util.EnumSet;
 
-public abstract class AbstractUnarOper<T extends Number> implements CommonExpression<T> {
-    protected CommonExpression<T> arg;
+public abstract class AbstractUnarOper<T> implements CommonExpression<T> {
     private final Oper me;
+    protected final CommonExpression<T> arg;
+    protected final Computer<T> computer;
 
-    public AbstractUnarOper(CommonExpression<T> arg, Oper me) {
-        this.arg = arg;
+    public AbstractUnarOper(Oper me, CommonExpression<T> arg, Computer<T> computer) {
         this.me = me;
-    }
-
-    public void setArg(CommonExpression<T> newArg) {
-        arg = newArg;
-    }
-
-    public CommonExpression<T> getArg() {
-        return arg;
+        this.arg = arg;
+        this.computer = computer;
     }
 
     public Oper getOper() {
         return me;
     }
 
-    public String toString() {
-        return me +
-                arg.toString();
-    }
-
-    public String toMiniString() {
-        return me +
-                arg.toMiniString();
-    }
-
     public abstract T calculate(T a);
 
-    public T evaluate(int x, int y, int z) {
+    public T evaluate(T x, T y, T z) {
         return calculate(arg.evaluate(x, y, z));
     }
 
@@ -45,20 +29,15 @@ public abstract class AbstractUnarOper<T extends Number> implements CommonExpres
         throw new OverflowException(me.toString() + a);
     }
 
+    public String toString() {
+        return me + arg.toString();
+    }
+
+    public String toMiniString() {
+        return me + arg.toMiniString();
+    }
+
     public String checkString(EnumSet<Oper> allowed) {
         return toMiniString();
-    }
-
-    public boolean equals(Object object) {
-        if (object != null && object.getClass() == getClass()) {
-            AbstractUnarOper<T> exp = (AbstractUnarOper<T>)object;
-            return me.equals(exp.getOper()) && arg.equals(exp.getArg());
-        } else {
-            return false;
-        }
-    }
-
-    public int hashCode() {
-        return toString().hashCode();
     }
 }

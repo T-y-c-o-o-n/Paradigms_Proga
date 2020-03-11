@@ -2,21 +2,21 @@ package expression.binary;
 
 import expression.AbstractBinarOper;
 import expression.CommonExpression;
+import expression.Computer;
 import expression.Oper;
-import expression.exceptions.CalculationException;
 
 import java.util.EnumSet;
 
-public class Add<T extends Number> extends AbstractBinarOper<T> {
+public class Add<T> extends AbstractBinarOper<T> {
 	private static final EnumSet<Oper> firstArgsToAllow = EnumSet.of(Oper.ADD, Oper.SUB, Oper.MUL, Oper.DIV);
 	private static final EnumSet<Oper> secondArgsToAllow = EnumSet.of(Oper.ADD, Oper.SUB, Oper.MUL, Oper.DIV);
 
-    public Add(CommonExpression<T> first, CommonExpression<T> second) {
-    	super(first, second, Oper.ADD);
+    public Add(CommonExpression<T> first, CommonExpression<T> second, Computer<T> computer) {
+    	super(Oper.ADD, first, second, computer);
     }
 
     public T calculate(T a, T b) {
-        return a.add(b);
+        return computer.add(a, b);
     }
 
     public String toMiniString() {

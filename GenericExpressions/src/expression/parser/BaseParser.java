@@ -8,7 +8,7 @@ public abstract class BaseParser {
     private final Source source;
     protected char tempCh;
     protected int pos;
-    private Queue<Character> tempQueue;
+    private final Queue<Character> tempQueue;
 
     protected BaseParser(Source source) {
         this.source = source;
