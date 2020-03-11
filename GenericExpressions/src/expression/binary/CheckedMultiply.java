@@ -15,7 +15,7 @@ public class CheckedMultiply<T extends Number> extends AbstractBinarOper<T> {
         super(first, second, Oper.MUL);
     }
 
-    public static boolean check(T a, T b) {
+    public boolean check(T a, T b) {
         if (a == 0 || b == 0) {
             return true;
         }

@@ -6,19 +6,11 @@ import expression.exceptions.BracketException;
 import expression.exceptions.ConstException;
 import expression.exceptions.ParsingException;
 import expression.unary.*;
-import java.math.BigInteger;
 
 import java.util.Map;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 public class ExpressionParser<T extends Number> implements Parser<T> {
-    private final static Map<Mode, Function<String, ? extends Number>> getNumber = Map.of(
-            Mode.BI, BigInteger::new,
-            Mode.D, Double::parseDouble,
-            Mode.I, Integer::parseInt
-    );
-
     public CommonExpression<T> parse(Source source) throws ParsingException {
         return new Parser<T>(source).parse(0);
     }
@@ -35,34 +27,13 @@ public class ExpressionParser<T extends Number> implements Parser<T> {
         return parse(new StringSource(string), mode);
     }
 
-    public enum Mode {
-        BI, D, I;
-
-        private final static Map<String, Mode> getType = Map.of(
-                "-bi", BI,
-                "-d", D,
-                "-i", I
-                );
-    }
-
-    private class Parser<T extends Number> extends BaseParser {
-        private final Map<String, Function<CommonExpression<T>, CommonExpression<T>>> getUnarOper = Map.of(
-                "abs", Abs::new,
-                "square", Square::new,
-                "log2", CheckedLog2::new,
-                "pow2", CheckedPow2::new
-        );
-
+    private static class Parser<T extends Number> extends BaseParser {
         private final Map<Oper, BiFunction<CommonExpression<T>,CommonExpression<T>, CommonExpression<T>>> getBinarOper
                 = Map.of(
-                Oper.ADD, CheckedAdd::new,
-                Oper.SUB, CheckedSubtract::new,
-                Oper.MUL, CheckedMultiply::new,
-                Oper.DIV, CheckedDivide::new,
-                Oper.LSH, LeftShift::new,
-                Oper.RSH, RightShift::new,
-                Oper.LOG, CheckedLog::new,
-                Oper.POW, CheckedPow::new
+                Oper.ADD, CheckedAdd<T>::new,
+                Oper.SUB, CheckedSubtract<T>::new,
+                Oper.MUL, CheckedMultiply<T>::new,
+                Oper.DIV, CheckedDivide<T>::new
         );
 
         private int balance = 0;
@@ -129,32 +100,7 @@ public class ExpressionParser<T extends Number> implements Parser<T> {
                 argLeft = getBinarOper.get(savedOper).apply(argLeft, argRight);
             }
         }
-/*
 
-        private CommonExpression parseBinarOper(CommonExpression argLeft, Oper tempOper,
-                                                CommonExpression argRight) throws ParsingException {
-            switch (tempOper) {
-                case RSH:
-                    return new RightShift(argLeft, argRight);
-                case LSH:
-                    return new LeftShift(argLeft, argRight);
-                case ADD:
-                    return new CheckedAdd(argLeft, argRight);
-                case SUB:
-                    return new CheckedSubtract(argLeft, argRight);
-                case MUL:
-                    return new CheckedMultiply(argLeft, argRight);
-                case DIV:
-                    return new CheckedDivide(argLeft, argRight);
-                case POW:
-                    return new CheckedPow(argLeft, argRight);
-                case LOG:
-                    return new CheckedLog(argLeft, argRight);
-                default:
-                    throw new ParsingException("unsupported operation", pos, getPre(), getChar(), getPost());
-            }
-        }
-*/
         private CommonExpression<T> parseUnarOper() throws ParsingException {
             skipWhitespace();
             if (isDigit()) {
@@ -184,21 +130,8 @@ public class ExpressionParser<T extends Number> implements Parser<T> {
                 return parsed;
             }
             StringBuilder sb = new StringBuilder();
-            while (isLetter() || isDigit()) {
-                sb.append(getChar());
-            }
-            if (sb.length() == 0) {
-                String pre = getPre();
-                throw new ParsingException("expected const, variable or unary operation, but found : '"
-                        + getChar() + "'", pos, pre, getPost());
-            }
-            skipWhitespace();
-
-            Function<CommonExpression<T>, CommonExpression<T>> constructor = getUnarOper.get(sb.toString());
-            if (constructor != null) {
-                return constructor.apply(parse(4));
-            }
-            throw new ParsingException("illegal unary operation: " + sb.toString());
+            throw new ParsingException("expected const, variable or unary operation, but found : '"
+                        + getChar() + "'", pos, getPre(), getPost());
         }
 
         private CommonExpression<T> parseConst(boolean positive) throws ParsingException {
@@ -227,6 +160,4 @@ public class ExpressionParser<T extends Number> implements Parser<T> {
             return new Variable<T>(var);
         }
     }
-
-
 }

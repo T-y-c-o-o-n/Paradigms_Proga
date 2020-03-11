@@ -41,7 +41,7 @@ public abstract class AbstractUnarOper<T extends Number> implements CommonExpres
         return calculate(arg.evaluate(x, y, z));
     }
 
-    protected void overflow(int a) {
+    protected void overflow(T a) {
         throw new OverflowException(me.toString() + a);
     }
 

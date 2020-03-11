@@ -18,7 +18,7 @@ public class CheckedAdd<T extends Number> extends AbstractBinarOper<T> {
         if ((a < 0) && (b < 0) && (Integer.MIN_VALUE - b > a) || (a > 0) && (b > 0) && (Integer.MAX_VALUE - b < a)) {
             overflow(a, b);
         }
-        return a + b;
+        return a.add(b);
     }
 
     public String toMiniString() {

@@ -16,7 +16,7 @@ public class Add<T extends Number> extends AbstractBinarOper<T> {
     }
 
     public T calculate(T a, T b) {
-        return a + b;
+        return a.add(b);
     }
 
     public String toMiniString() {

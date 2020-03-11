@@ -1,6 +1,5 @@
 package expression;
 
-import expression.binary.CheckedPow;
 import expression.exceptions.ParsingException;
 import expression.parser.*;
 

@@ -33,7 +33,7 @@ public abstract class AbstractBinarOper<T extends Number> implements CommonExpre
 		return calculate(arg1.evaluate(x, y, z), arg2.evaluate(x, y, z));
 	}
 
-	protected void overflow(int a, int b) {
+	protected void overflow(T a, T b) {
 		throw new OverflowException(a + me.toString() + b);
 	}
 
