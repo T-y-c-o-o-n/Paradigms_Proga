@@ -9,10 +9,6 @@ public class Variable<T> implements CommonExpression<T> {
         this.variable = variable;
     }
 
-    public String getVar() {
-        return variable;
-    }
-
     public T evaluate(T x, T y, T z) {
         if (variable.equals("x")) {
             return x;

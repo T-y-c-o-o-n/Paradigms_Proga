@@ -14,7 +14,7 @@ public enum Oper {
     private final String view;
     private final int priority;
 
-    Oper(String view, int priority) {
+    private Oper(String view, int priority) {
         this.view = view;
         this.priority = priority;
     }

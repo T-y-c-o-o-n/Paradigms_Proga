@@ -1,6 +1,7 @@
-package expression.generic;
+package expression.tests;
 
-import expression.tests.BaseTest;
+import expression.generic.GenericTabulator;
+import expression.generic.Tabulator;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
