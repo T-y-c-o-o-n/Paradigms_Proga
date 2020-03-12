@@ -25,6 +25,7 @@ public class ExpressionParser<T> implements Parser<T> {
     }
 
     private static class Parser<T> extends BaseParser {
+        private final static int MAX_PRIORITY = 3;
         private int balance;
         private Oper oper;
         private final Computer<T> example;
@@ -40,7 +41,7 @@ public class ExpressionParser<T> implements Parser<T> {
         private CommonExpression<T> parse(int priority) throws ParsingException {
             oper = Oper.NAN;
             skipWhitespace();
-            if (priority == 4) {
+            if (priority == MAX_PRIORITY) {
                 return parseUnaryOper();
             }
             CommonExpression<T> argLeft;
@@ -63,6 +64,14 @@ public class ExpressionParser<T> implements Parser<T> {
                         oper = Oper.MUL;
                     } else if (test('/')) {
                         oper = Oper.DIV;
+                    } else if (test('m')) {
+                        if (test('i')) {
+                            expect('n');
+                            oper = Oper.MIN;
+                        } else {
+                            expect("ax");
+                            oper = Oper.MAX;
+                        }
                     } else {
                         throw new ParsingException("unexpected binary operation: ",
                                 pos, getPre(), getChar(), getPost());
@@ -81,6 +90,8 @@ public class ExpressionParser<T> implements Parser<T> {
 
         private CommonExpression<T> makeBinaryOper(Oper me, CommonExpression<T> arg1, CommonExpression<T> arg2) {
             switch (me) {
+                case MIN: return new Min<>(arg1, arg2, example);
+                case MAX: return new Max<>(arg1, arg2, example);
                 case ADD: return new Add<>(arg1, arg2, example);
                 case SUB: return new Subtract<>(arg1, arg2, example);
                 case MUL: return new Multiply<>(arg1, arg2, example);
@@ -104,6 +115,10 @@ public class ExpressionParser<T> implements Parser<T> {
                 } else {
                     return new Negate<>(parseUnaryOper(), example);
                 }
+            }
+            if (test('c')) {
+                expect("ount");
+                return new Count<>(parseUnaryOper(), example);
             }
             if (test('(')) {
                 balance++;

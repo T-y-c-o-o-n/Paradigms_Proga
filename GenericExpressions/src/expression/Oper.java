@@ -1,11 +1,14 @@
 package expression;
 
 public enum Oper {
+    MIN(" min ", 0),
+    MAX(" max ", 0),
     ADD(" + ", 1),
     SUB(" - ", 1),
     MUL(" * ", 2),
     DIV(" / ", 2),
-    NEG("- ", 4),
+    CNT("count ", 3),
+    NEG("- ", 3),
     NAN(" NaN ", -1);
 
     private final String view;

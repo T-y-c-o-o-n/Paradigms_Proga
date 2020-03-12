@@ -2,7 +2,9 @@ package queue;
 
 public class ArrayQueueADT {
     // INV:
-    // Q = {e_first, e_2, e_3, ..., e_n-1, e_last}
+    // Q = {e_first, e_2, e_3, ..., e_n-1, e_last | e_i not null}
+    // e_first - last element in queue
+    // e_last - first element in queue
     // First in - Last out
     private int head = 0, tail = 0;
     private Object[] elements = new Object[2];

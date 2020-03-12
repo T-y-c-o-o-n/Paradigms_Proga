@@ -2,7 +2,9 @@ package queue;
 
 public class ArrayQueueModule {
     // INV:
-    // Q = {e_first, e_2, e_3, ..., e_n-1, e_last}
+    // Q = {e_first, e_2, e_3, ..., e_n-1, e_last | e_i not null}
+    // e_first - last element in queue
+    // e_last - first element in queue
     // First in - Last out
     private static int head = 0, tail = 0;
     private static Object[] elements = new Object[2];
@@ -10,16 +12,16 @@ public class ArrayQueueModule {
     // Pre: e not null
     // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
     public static void enqueue(Object e) {
-        assert e != null;
-        elements[tail] = e;
-        tail = inc(tail);
         if (size() == elements.length) {
             increaseCapacity();
         }
+        assert e != null;
+        elements[tail] = e;
+        tail = inc(tail);
     }
 
     // Pre: |Q| > 0
-    // Post: R = e_1 && Q' = {e_2, ..., e_n} && |Q'| = |Q| - 1
+    // Post: R = e_first && Q' = {e_2, ..., e_n} && |Q'| = |Q| - 1
     public static Object dequeue() {
         assert size() > 0;
         Object result = elements[head];
@@ -29,7 +31,7 @@ public class ArrayQueueModule {
     }
 
     // Pre: |Q| > 0
-    // Post: R = e_1
+    // Post: R = e_first
     public static Object element() {
         assert size() > 0;
         return elements[head];
