@@ -7,6 +7,7 @@ import expression.exceptions.ConstException;
 import expression.exceptions.ParsingException;
 import expression.generic.Computer;
 import expression.generic.IntComputer;
+import expression.generic.UintComputer;
 import expression.unary.*;
 
 public class ExpressionParser<T> implements Parser<T> {
@@ -62,21 +63,17 @@ public class ExpressionParser<T> implements Parser<T> {
                         oper = Oper.ADD;
                     } else if (test('-')) {
                         oper = Oper.SUB;
+                    } else if (test("min")) {
+                        oper = Oper.MIN;
+                    } else if (test("max")) {
+                        oper = Oper.MAX;
                     } else if (test('*')) {
                         oper = Oper.MUL;
                     } else if (test('/')) {
                         oper = Oper.DIV;
-                    } else if (test('m')) {
-                        if (test('i')) {
-                            expect('n');
-                            oper = Oper.MIN;
-                        } else {
-                            expect("ax");
-                            oper = Oper.MAX;
-                        }
                     } else {
                         throw new ParsingException("unexpected binary operation: ",
-                                pos, getPre(), getChar(), getPost());
+                                cnt, getPre(), getChar(), getPost());
                     }
                 }
                 if (oper.getPriority() != priority) {
@@ -134,8 +131,9 @@ public class ExpressionParser<T> implements Parser<T> {
                 balance--;
                 return parsed;
             }
-            throw new ParsingException("expected const, variable or unary operation, but found : '"
-                        + getChar() + "'", pos, getPre(), getPost());
+            String pre = getPre();
+            char ch = getChar();
+            throw new ParsingException("expected const, variable or unary operation, but found : ", cnt, pre, ch, getPost());
         }
 
         private CommonExpression<T> parseConst(boolean positive) throws ParsingException {

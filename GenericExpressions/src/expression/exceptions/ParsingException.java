@@ -9,7 +9,7 @@ public class ParsingException extends Exception {
         super(message + " on position " + pos);
     }
 
-    public ParsingException(String message, int pos, String pre, String post) {
+    public ParsingException(String message, String pre, String post) {
         super(message + ":   \".....   " + pre + " HERE " + post + "   .....\"");
     }
 

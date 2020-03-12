@@ -1,64 +1,87 @@
 package expression.parser;
 
 import expression.exceptions.ParsingException;
-import java.util.Queue;
-import java.util.LinkedList;
 
 public abstract class BaseParser {
     private final Source source;
-    protected char tempCh;
-    protected int pos;
-    private final Queue<Character> tempQueue;
+    private final CharQueue pre;
+    private final CharQueue buffer;
+    protected char ch;  // current char
+    protected int cnt;  // count of checked symbols
 
     protected BaseParser(Source source) {
         this.source = source;
-        pos = 0;
-        tempQueue = new LinkedList<>();
+        pre = new CharQueue();
+        buffer = new CharQueue();
+        cnt = 0;
     }
 
     protected String getPre() {
         StringBuilder sb = new StringBuilder();
-        while (!tempQueue.isEmpty()) {
-            sb.append(tempQueue.remove());
+        while (pre.size() > 0) {
+            sb.append(pre.pop());
         }
         return sb.toString();
     }
 
-    protected String getPost() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 20 && (tempCh != '\0'); ++i) {
-            nextChar();
-            sb.append(tempCh);
-        }
-        return sb.toString();
+        protected String getPost() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(ch);
+            for (int i = 0; i < 19 && (ch != '\0'); ++i) {
+                nextChar();
+                sb.append(ch);
+            }
+            return sb.toString();
     }
 
     protected void nextChar() {
-        tempQueue.add(tempCh);
-        if (tempQueue.size() >= 20) {
-            tempQueue.remove();
+        pre.push(ch);
+        if (pre.size() >= 20) {
+            pre.pop();
         }
-        tempCh = source.nextChar();
-        pos++;
+        if (buffer.size() > 0) {
+            ch = buffer.pop();
+        } else {
+            ch = source.nextChar();
+        }
+        cnt++;
     }
 
     protected char getChar() {
-        char ch = tempCh;
+        char ch = this.ch;
         nextChar();
         return ch;
     }
 
-    protected boolean test(char expected) {
-        if (tempCh == expected) {
+    protected boolean test(char tested) {
+        if (ch == tested) {
             nextChar();
             return true;
         }
         return false;
     }
 
-    protected void expect(char ch) throws ParsingException {
-        if (ch != tempCh) {
-            throw new ParsingException("expected: '" + ch + "' , but found: " + tempCh);
+    protected boolean test(String tested) {
+        if (ch != tested.charAt(0)) {
+            return false;
+        }
+        for (int i = 1; i < tested.length(); ++i) {
+            if (i - 1 == buffer.size()) {
+                buffer.push(source.nextChar());
+            }
+            if (buffer.get(i - 1) != tested.charAt(i)) {
+                return false;
+            }
+        }
+        for (int i = 0; i < tested.length(); i++) {
+            nextChar();
+        }
+        return true;
+    }
+
+    protected void expect(char expected) throws ParsingException {
+        if (ch != expected) {
+            throw new ParsingException("expected: '" + expected + "' , but found: " + ch);
         }
         nextChar();
     }
@@ -70,20 +93,68 @@ public abstract class BaseParser {
     }
 
     protected void skipWhitespace() {
-        while (Character.isWhitespace(tempCh)) {
+        while (Character.isWhitespace(ch)) {
             nextChar();
         }
     }
 
-    protected boolean isLetter() { return 'a' <= tempCh && tempCh <= 'z'; }
+    protected boolean isLetter() { return 'a' <= ch && ch <= 'z'; }
 
     protected boolean isDigit() {
-        return '0' <= tempCh && tempCh <= '9';
+        return '0' <= ch && ch <= '9';
     }
 
     protected boolean isVariable() {
-        return 'x' <= tempCh && tempCh <= 'z';
+        return 'x' <= ch && ch <= 'z';
     }
 
-    protected boolean isCloseBracket() { return tempCh == ')'; }
+    protected boolean isCloseBracket() { return ch == ')'; }
+
+    private static class CharQueue {
+        private char[] arr = new char[10];
+        private int head, tail = 0;
+
+        private char get(int pos) {
+            return arr[(head + pos) % arr.length];
+        }
+
+        private void push(char e) {
+            if (size() + 1 == arr.length) {
+                grow();
+            }
+
+            arr[tail] = e;
+            tail = inc(tail);
+        }
+
+        private char pop() {
+            assert size() > 0;
+
+            char e = arr[head];
+            head = inc(head);
+            return e;
+        }
+
+        private int size() {
+            return (arr.length + tail - head) % arr.length;
+        }
+
+        private void grow() {
+            int size = size();
+            char[] newArr = new char[arr.length * 2];
+            if (tail < head) {
+                System.arraycopy(arr, head, newArr, 0, arr.length - head);
+                System.arraycopy(arr, 0, newArr, arr.length - head, tail);
+            } else {
+                System.arraycopy(arr, head, newArr, 0, tail - head);
+            }
+            head = 0;
+            tail = size;
+            arr = newArr;
+        }
+
+        private int inc(int a) {
+            return (a + 1) % arr.length;
+        }
+    }
 }
