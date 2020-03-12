@@ -1,4 +1,4 @@
-package expression;
+package expression.generic;
 
 public interface Computer<T> {
     T min(T a, T b);

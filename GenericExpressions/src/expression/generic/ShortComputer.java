@@ -1,7 +1,7 @@
-package expression;
+package expression.generic;
 
 import expression.exceptions.DivisionByZeroException;
-import expression.exceptions.OverflowException;
+import expression.generic.Computer;
 
 public class ShortComputer implements Computer<Short> {
     public Short min(Short a, Short b) {

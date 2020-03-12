@@ -5,6 +5,8 @@ import expression.binary.*;
 import expression.exceptions.BracketException;
 import expression.exceptions.ConstException;
 import expression.exceptions.ParsingException;
+import expression.generic.Computer;
+import expression.generic.IntComputer;
 import expression.unary.*;
 
 public class ExpressionParser<T> implements Parser<T> {

@@ -1,7 +1,7 @@
 package expression.parser;
 
 import expression.CommonExpression;
-import expression.Computer;
+import expression.generic.Computer;
 import expression.exceptions.ParsingException;
 
 public interface Parser<T> {

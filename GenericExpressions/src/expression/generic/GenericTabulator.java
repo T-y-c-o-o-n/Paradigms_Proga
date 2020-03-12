@@ -2,13 +2,11 @@ package expression.generic;
 
 import expression.*;
 import expression.exceptions.CalculationException;
-import expression.exceptions.ParsingException;
 import expression.parser.ExpressionParser;
 import expression.parser.Parser;
 
 import java.math.BigInteger;
 import java.util.Map;
-import java.util.function.Function;
 
 public class GenericTabulator implements Tabulator {
     private static Map<String, Parser> parsers = Map.of(

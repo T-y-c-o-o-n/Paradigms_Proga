@@ -1,8 +1,8 @@
-package expression;
+package expression.generic;
 
-import expression.exceptions.CalculationException;
 import expression.exceptions.DivisionByZeroException;
 import expression.exceptions.OverflowException;
+import expression.generic.Computer;
 
 public class IntComputer implements Computer<Integer> {
     public Integer min(Integer a, Integer b) {
