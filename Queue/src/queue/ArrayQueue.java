@@ -2,27 +2,13 @@ package queue;
 
 public class ArrayQueue {
     // INV:
-    /*
-    *      МНЕНИЕ О КАРТИНКАХ В ИНВАРИАНТЕ ОЧЕРЕДИ
-    *
-    *                  __
-    *                / | \
-    *              /  |   \     <--- HEAD
-    *             |-------|
-    *            |       |
-    *           |       |
-    *          |       |
-    *         |       |
-    *     ___|       |____
-    *   /     \     /     \
-    *  |      |----|      |     <--- BALLS
-    *  \_____/     \_____/
-    *
-     */
     // Q = {e_first, e_2, e_3, ..., e_n-1, e_last | e_i not null}
     // e_first - last element in queue
     // e_last - first element in queue
     // First in - Last out
+    // в реализации:
+    // head == tail <=> size == 0;
+    // size > 0 <=> head != tail
     private int head = 0, tail = 0;
     private Object[] elements = new Object[2];
 
@@ -30,17 +16,19 @@ public class ArrayQueue {
     // Post: Q' = {e_1, e_2, ..., e_n, e} && |Q| > 0
     public void enqueue(/*ArrayQueue this, */Object e) {
         assert e != null;
-        elements[tail] = e;
-        tail = inc(tail);
-        if (size() == elements.length) {
+
+        if (size() + 1 == elements.length) {
             increaseCapacity();
         }
+        elements[tail] = e;
+        tail = inc(tail);
     }
 
     // Pre: |Q| > 0
     // Post: R = e_1 && Q' = {e_2, ..., e_n} && |Q'| = |Q| - 1
     public Object dequeue(/*ArrayQueue this*/) {
         assert size() > 0;
+
         Object result = elements[head];
         elements[head] = null;
         head = inc(head);
@@ -51,16 +39,14 @@ public class ArrayQueue {
     // Post: R = e_1
     public Object element(/*ArrayQueue this*/) {
         assert size() > 0;
+
         return elements[head];
     }
 
     // Pre: true
     // Post: R = |Q|
     public int size(/*ArrayQueue this*/) {
-        if (head == tail) {
-            return elements[head] == null ? 0 : elements.length;
-        }
-        return head > tail ? elements.length - (head - tail) : tail - head;
+        return tail < head ? elements.length - (head - tail) : tail - head;
     }
 
     // Pre: true
@@ -81,17 +67,19 @@ public class ArrayQueue {
     // Post: Q' = {e, e_1, e_2, ..., e_n-1, e_n} && |Q| > 0
     public void push(/*ArrayQueue this, */Object e) {
         assert e != null;
-        head = dec(head);
-        elements[head] = e;
-        if (size() == elements.length) {
+
+        if (size() + 1 == elements.length) {
             increaseCapacity();
         }
+        head = dec(head);
+        elements[head] = e;
     }
 
     // Pre: |Q| > 0
     // Post: R = e_n && Q' = {e_1, e_2, ..., e_n-1} && |Q'| = |Q| - 1
     public Object remove(/*ArrayQueueADT this*/) {
         assert size() > 0;
+
         tail = dec(tail);
         Object result = elements[tail];
         elements[tail] = null;
@@ -102,16 +90,18 @@ public class ArrayQueue {
     // Post: R = e_n
     public Object peek(/*ArrayQueue this*/) {
         assert size() > 0;
+
         return elements[dec(tail)];
     }
 
     private void increaseCapacity(/*ArrayQueue this*/) {
         Object[] increased = new Object[elements.length * 2];
+        int size = size();
         System.arraycopy(elements, head, increased, 0, elements.length - head);
         System.arraycopy(elements, 0, increased, elements.length - head, tail);
         elements = increased;
         head = 0;
-        tail = elements.length / 2;
+        tail = size;
     }
 
     private int inc(/*ArrayQueue this, */int a) {
