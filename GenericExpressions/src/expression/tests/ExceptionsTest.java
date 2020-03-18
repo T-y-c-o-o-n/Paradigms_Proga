@@ -76,7 +76,7 @@ public class ExceptionsTest extends ParserTest {
     private void testParsingErrors() {
         for (final Op<String> op : parsingTest) {
             try {
-                new ExpressionParser().parse(op.f);
+                new ExpressionParser<Integer>().parse(op.f, new IntComputer());
                 assert false : "Successfully parsed " + op.f;
             } catch (final Exception e) {
                 System.out.format("%-30s %s%n", op.name, e.getClass().getSimpleName() + ": " + e.getMessage());
@@ -116,8 +116,8 @@ public class ExceptionsTest extends ParserTest {
         testParsingErrors();
     }
 
-    protected TripleExpression parse(final String expression, final boolean reparse) {
-        final Parser parser = new ExpressionParser();
+    protected TripleExpression<Integer> parse(final String expression, final boolean reparse) {
+        final Parser<Integer> parser = new ExpressionParser<Integer>();
         if (expression.length() > 10) {
             loop: for (final char ch : CHARS) {
                 for (int i = 0; i < 10; i++) {
@@ -136,7 +136,7 @@ public class ExceptionsTest extends ParserTest {
                         final String input = expression.substring(0, index) + ch + expression.substring(index);
                         try {
                             counter.nextTest();
-                            parser.parse(input);
+                            parser.parse(input, new IntComputer());
                             throw new AssertionError("Parsing error expected for " + expression.substring(0, index) + "<ERROR_INSERTED -->" + ch + "<-- ERROR_INSERTED>" + expression.substring(index));
                         } catch (final Exception e) {
                             // Ok
@@ -149,7 +149,7 @@ public class ExceptionsTest extends ParserTest {
         }
         counter.nextTest();
         try {
-            final TripleExpression parse = parser.parse(expression);
+            final TripleExpression parse = parser.parse(expression, new IntComputer());
             counter.passed();
             return parse;
         } catch (final Exception e) {

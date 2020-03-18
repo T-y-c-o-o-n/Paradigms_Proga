@@ -2,7 +2,9 @@ package expression.tests;
 
 import expression.CommonExpression;
 import expression.TripleExpression;
+import expression.generic.IntComputer;
 import expression.parser.ExpressionParser;
+import expression.parser.Parser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -71,7 +73,7 @@ public class ParserTest extends BaseTest {
     protected void test() {
         for (final Op<TExpression> test : tests) {
             System.out.println("Testing: " + test.name);
-            final TripleExpression expression = parse(test.name, true);
+            final TripleExpression<Integer> expression = parse(test.name, true);
             for (final Integer x : TEST_VALUES) {
                 for (final Integer y : TEST_VALUES) {
                     for (final Integer z : TEST_VALUES) {
@@ -93,16 +95,16 @@ public class ParserTest extends BaseTest {
         }
     }
 
-    protected TripleExpression parse(final String expression, final boolean reparse) {
+    protected TripleExpression<Integer> parse(final String expression, final boolean reparse) {
         try {
-            final ExpressionParser parser = new ExpressionParser();
+            final Parser<Integer> parser = new ExpressionParser<>();
             if (reparse) {
                 counter.nextTest();
-                parser.parse(expression);
+                parser.parse(expression, new IntComputer());
                 counter.passed();
             }
             counter.nextTest();
-            final CommonExpression result = parser.parse(expression);
+            final CommonExpression<Integer> result = parser.parse(expression, new IntComputer());
             counter.passed();
             return result;
         } catch (final Exception e) {

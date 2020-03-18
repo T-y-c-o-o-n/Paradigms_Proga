@@ -15,14 +15,6 @@ public class ExpressionParser<T> implements Parser<T> {
         return new Parser<>(source, example).parse(0);
     }
 
-    public CommonExpression<T> parse(Source source) throws ParsingException {
-        return parse(source, (Computer<T>) new IntComputer());
-    }
-
-    public CommonExpression<T> parse(String string) throws ParsingException {
-        return parse(new StringSource(string));
-    }
-
     public CommonExpression<T> parse(String string, Computer<T> example) throws ParsingException {
         return parse(new StringSource(string), example);
     }
