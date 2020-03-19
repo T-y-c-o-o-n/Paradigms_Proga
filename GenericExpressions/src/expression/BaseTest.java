@@ -1,4 +1,4 @@
-package expression.tests;
+package expression;
 
 import base.Asserts;
 import base.TestCounter;

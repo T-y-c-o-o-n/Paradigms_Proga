@@ -6,8 +6,6 @@ import expression.exceptions.BracketException;
 import expression.exceptions.ConstException;
 import expression.exceptions.ParsingException;
 import expression.generic.Computer;
-import expression.generic.IntComputer;
-import expression.generic.UintComputer;
 import expression.unary.*;
 
 public class ExpressionParser<T> implements Parser<T> {
@@ -65,7 +63,7 @@ public class ExpressionParser<T> implements Parser<T> {
                         oper = Oper.DIV;
                     } else {
                         throw new ParsingException("unexpected binary operation: ",
-                                cnt, getPre(), getChar(), getPost());
+                                pos, getPre(), getChar(), getPost());
                     }
                 }
                 if (oper.getPriority() != priority) {
@@ -125,7 +123,7 @@ public class ExpressionParser<T> implements Parser<T> {
             }
             String pre = getPre();
             char ch = getChar();
-            throw new ParsingException("expected const, variable or unary operation, but found : ", cnt, pre, ch, getPost());
+            throw new ParsingException("expected const, variable or unary operation, but found : ", pos, pre, ch, getPost());
         }
 
         private CommonExpression<T> parseConst(boolean positive) throws ParsingException {

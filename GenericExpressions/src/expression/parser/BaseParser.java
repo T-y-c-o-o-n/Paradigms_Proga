@@ -7,13 +7,13 @@ public abstract class BaseParser {
     private final CharQueue pre;
     private final CharQueue buffer;
     protected char ch;  // current char
-    protected int cnt;  // count of checked symbols
+    protected int pos;  // position of current char in source
 
     protected BaseParser(Source source) {
         this.source = source;
         pre = new CharQueue();
         buffer = new CharQueue();
-        cnt = 0;
+        pos = -1;
     }
 
     protected String getPre() {
@@ -44,7 +44,7 @@ public abstract class BaseParser {
         } else {
             ch = source.nextChar();
         }
-        cnt++;
+        pos++;
     }
 
     protected char getChar() {

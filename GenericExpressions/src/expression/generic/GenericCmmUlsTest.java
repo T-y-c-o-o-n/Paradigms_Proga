@@ -1,4 +1,4 @@
-package expression.tests;
+package expression.generic;
 
 /**
  * Count, min, max over unchecked int, long, short test.

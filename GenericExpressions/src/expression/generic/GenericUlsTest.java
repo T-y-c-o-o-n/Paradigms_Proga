@@ -1,4 +1,4 @@
-package expression.tests;
+package expression.generic;
 
 /**
  * Generic unchecked int, long, short test.
