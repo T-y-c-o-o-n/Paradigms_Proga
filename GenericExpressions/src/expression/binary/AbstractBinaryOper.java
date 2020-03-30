@@ -1,19 +1,19 @@
 package expression.binary;
 
-import expression.CommonExpression;
+import expression.Expression;
 import expression.Oper;
-import expression.exceptions.OverflowException;
 import expression.generic.Computer;
 
 import java.util.EnumSet;
 
-public abstract class AbstractBinaryOper<T> implements CommonExpression<T> {
+// :NOTE: any bounds on T? Can I divide String by String? I shouldn't
+public abstract class AbstractBinaryOper<T extends Number> implements Expression<T> {
 	private final Oper me;
-	protected final CommonExpression<T> arg1;
-	protected final CommonExpression<T> arg2;
+	protected final Expression<T> arg1;
+	protected final Expression<T> arg2;
 	protected final Computer<T> computer;
 
-	public AbstractBinaryOper(Oper me, CommonExpression<T> arg1, CommonExpression<T> arg2, Computer<T> computer) {
+	public AbstractBinaryOper(Oper me, Expression<T> arg1, Expression<T> arg2, Computer<T> computer) {
 		this.me = me;
 		this.arg1 = arg1;
 		this.arg2 = arg2;

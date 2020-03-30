@@ -1,7 +1,5 @@
 package expression.generic;
 
-import expression.generic.Computer;
-
 public class DoubleComputer implements Computer<Double> {
     public Double min(Double a, Double b) { return Double.min(a, b); }
 

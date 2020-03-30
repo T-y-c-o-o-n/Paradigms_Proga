@@ -2,7 +2,7 @@ package expression;
 
 import java.util.EnumSet;
 
-public class Variable<T> implements CommonExpression<T> {
+public class Variable<T extends Number> implements Expression<T> {
     private final String variable;
 
     public Variable(String variable) {

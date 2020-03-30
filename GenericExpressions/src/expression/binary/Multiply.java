@@ -1,16 +1,16 @@
 package expression.binary;
 
-import expression.CommonExpression;
+import expression.Expression;
 import expression.generic.Computer;
 import expression.Oper;
 
 import java.util.EnumSet;
 
-public class Multiply<T> extends AbstractBinaryOper<T> {
+public class Multiply<T extends Number> extends AbstractBinaryOper<T> {
     private static final EnumSet<Oper> firstArgsToAllow = EnumSet.of(Oper.MUL, Oper.DIV);
     private static final EnumSet<Oper> secondArgsToAllow = EnumSet.of(Oper.MUL);
 
-    public Multiply(CommonExpression<T> first, CommonExpression<T> second, Computer<T> computer) {
+    public Multiply(Expression<T> first, Expression<T> second, Computer<T> computer) {
     	super(Oper.MUL, first, second, computer);
     }
 

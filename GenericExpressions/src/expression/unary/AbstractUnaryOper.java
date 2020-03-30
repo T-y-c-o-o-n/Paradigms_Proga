@@ -1,18 +1,17 @@
 package expression.unary;
 
-import expression.CommonExpression;
+import expression.Expression;
 import expression.Oper;
-import expression.exceptions.OverflowException;
 import expression.generic.Computer;
 
 import java.util.EnumSet;
 
-public abstract class AbstractUnaryOper<T> implements CommonExpression<T> {
+public abstract class AbstractUnaryOper<T extends Number> implements Expression<T> {
     private final Oper me;
-    protected final CommonExpression<T> arg;
+    protected final Expression<T> arg;
     protected final Computer<T> computer;
 
-    public AbstractUnaryOper(Oper me, CommonExpression<T> arg, Computer<T> computer) {
+    public AbstractUnaryOper(Oper me, Expression<T> arg, Computer<T> computer) {
         this.me = me;
         this.arg = arg;
         this.computer = computer;

@@ -8,22 +8,36 @@ import expression.exceptions.ParsingException;
 import expression.generic.Computer;
 import expression.unary.*;
 
-public class ExpressionParser<T> implements Parser<T> {
-    public CommonExpression<T> parse(Source source, Computer<T> example) throws ParsingException {
-        return new Parser<>(source, example).parse(0);
+import java.util.Map;
+
+public class ExpressionParser<T extends Number> {
+    public Expression<T> parse(Source source, Computer<T> example) throws ParsingException {
+        return new InnerParser<>(source, example).parse(0);
     }
 
-    public CommonExpression<T> parse(String string, Computer<T> example) throws ParsingException {
+    public Expression<T> parse(String string, Computer<T> example) throws ParsingException {
         return parse(new StringSource(string), example);
     }
 
-    private static class Parser<T> extends BaseParser {
+    private static class InnerParser<T extends Number> extends BaseParser {
         private final static int MAX_PRIORITY = 3;
         private int balance;
         private Oper oper;
         private final Computer<T> example;
 
-        public Parser(Source source, Computer<T> example) {
+        private static Map<Character, Oper> charToOper = Map.of(
+                '+', Oper.ADD,
+                '-', Oper.SUB,
+                '*', Oper.MUL,
+                '/', Oper.DIV
+        );
+
+        private static Map<String, Oper> stringToOper = Map.of(
+                "min", Oper.MIN,
+                "max", Oper.MAX
+        );
+
+        public InnerParser(Source source, Computer<T> example) {
             super(source);
             balance = 0;
             oper = Oper.NAN;
@@ -31,13 +45,13 @@ public class ExpressionParser<T> implements Parser<T> {
             nextChar();
         }
 
-        private CommonExpression<T> parse(int priority) throws ParsingException {
+        private Expression<T> parse(int priority) throws ParsingException {
             oper = Oper.NAN;
             skipWhitespace();
             if (priority == MAX_PRIORITY) {
                 return parseUnaryOper();
             }
-            CommonExpression<T> argLeft;
+            Expression<T> argLeft;
             argLeft = parse(priority + 1);
             while (true) {
                 skipWhitespace();
@@ -49,47 +63,62 @@ public class ExpressionParser<T> implements Parser<T> {
                             throw new BracketException("no opening bracket: ", getPre(), getPost());
                         }
                         return argLeft;
-                    } else if (test('+')) {
-                        oper = Oper.ADD;
-                    } else if (test('-')) {
-                        oper = Oper.SUB;
-                    } else if (test("min")) {
-                        oper = Oper.MIN;
-                    } else if (test("max")) {
-                        oper = Oper.MAX;
-                    } else if (test('*')) {
-                        oper = Oper.MUL;
-                    } else if (test('/')) {
-                        oper = Oper.DIV;
                     } else {
-                        throw new ParsingException("unexpected binary operation: ",
-                                pos, getPre(), getChar(), getPost());
+                        boolean defined = false;
+                        for (Map.Entry<Character, Oper> abc : charToOper.entrySet()) {
+                            if (test(abc.getKey())) {
+                                oper = abc.getValue();
+                                defined = true;
+                                break;
+                            }
+                        }
+                        if (!defined) {
+                            for (Map.Entry<String, Oper> abc : stringToOper.entrySet()) {
+                                if (test(abc.getKey())) {
+                                    oper = abc.getValue();
+                                    defined = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (!defined) {
+                            throw new ParsingException("unexpected binary operation: ",
+                                    pos, getPre(), getChar(), getPost());
+                        }
                     }
                 }
+
                 if (oper.getPriority() != priority) {
                     return argLeft;
                 }
                 Oper savedOper = oper;
-                CommonExpression<T> argRight;
+                Expression<T> argRight;
                 oper = Oper.NAN;
                 argRight = parse(priority + 1);
                 argLeft = makeBinaryOper(savedOper, argLeft, argRight);
             }
         }
 
-        private CommonExpression<T> makeBinaryOper(Oper me, CommonExpression<T> arg1, CommonExpression<T> arg2) {
+        private Expression<T> makeBinaryOper(Oper me, Expression<T> arg1, Expression<T> arg2) {
             switch (me) {
-                case MIN: return new Min<>(arg1, arg2, example);
-                case MAX: return new Max<>(arg1, arg2, example);
-                case ADD: return new Add<>(arg1, arg2, example);
-                case SUB: return new Subtract<>(arg1, arg2, example);
-                case MUL: return new Multiply<>(arg1, arg2, example);
-                case DIV: return new Divide<>(arg1, arg2, example);
-                default: return null;
+                case MIN:
+                    return new Min<>(arg1, arg2, example);
+                case MAX:
+                    return new Max<>(arg1, arg2, example);
+                case ADD:
+                    return new Add<>(arg1, arg2, example);
+                case SUB:
+                    return new Subtract<>(arg1, arg2, example);
+                case MUL:
+                    return new Multiply<>(arg1, arg2, example);
+                case DIV:
+                    return new Divide<>(arg1, arg2, example);
+                default:
+                    return null;
             }
         }
 
-        private CommonExpression<T> parseUnaryOper() throws ParsingException {
+        private Expression<T> parseUnaryOper() throws ParsingException {
             skipWhitespace();
             if (isDigit()) {
                 return parseConst(true);
@@ -111,7 +140,7 @@ public class ExpressionParser<T> implements Parser<T> {
             }
             if (test('(')) {
                 balance++;
-                CommonExpression<T> parsed = parse(0);
+                Expression<T> parsed = parse(0);
                 skipWhitespace();
                 try {
                     expect(')');
@@ -126,7 +155,7 @@ public class ExpressionParser<T> implements Parser<T> {
             throw new ParsingException("expected const, variable or unary operation, but found : ", pos, pre, ch, getPost());
         }
 
-        private CommonExpression<T> parseConst(boolean positive) throws ParsingException {
+        private Expression<T> parseConst(boolean positive) throws ParsingException {
             StringBuilder sb = new StringBuilder();
             if (!positive) {
                 sb.append('-');
@@ -141,7 +170,7 @@ public class ExpressionParser<T> implements Parser<T> {
             return new Const<>(example.parseVal(sb.toString()));
         }
 
-        private CommonExpression<T> parseVar() {
+        private Expression<T> parseVar() {
             String var = String.valueOf(getChar());
             return new Variable<>(var);
         }

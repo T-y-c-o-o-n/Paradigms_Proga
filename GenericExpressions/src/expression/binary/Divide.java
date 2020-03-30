@@ -1,16 +1,16 @@
 package expression.binary;
 
-import expression.CommonExpression;
+import expression.Expression;
 import expression.generic.Computer;
 import expression.Oper;
 
 import java.util.EnumSet;
 
-public class Divide<T> extends AbstractBinaryOper<T> {
+public class Divide<T extends Number> extends AbstractBinaryOper<T> {
 	private static final EnumSet<Oper> firstArgsToAllow = EnumSet.of(Oper.MUL, Oper.DIV);
 	private static final EnumSet<Oper> secondArgsToAllow = EnumSet.noneOf(Oper.class);
 
-    public Divide(CommonExpression<T> first, CommonExpression<T> second, Computer<T> computer) {
+    public Divide(Expression<T> first, Expression<T> second, Computer<T> computer) {
     	super(Oper.DIV, first, second, computer);
     }
 

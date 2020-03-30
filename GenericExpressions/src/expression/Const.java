@@ -2,7 +2,7 @@ package expression;
 
 import java.util.EnumSet;
 
-public class Const<T> implements CommonExpression<T> {
+public class Const<T extends Number> implements Expression<T> {
     private final T val;
 
     public Const(T val) {

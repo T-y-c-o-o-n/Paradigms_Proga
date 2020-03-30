@@ -1,6 +1,6 @@
 package expression.generic;
 
-public interface Computer<T> {
+public interface Computer<T extends Number> {
     T min(T a, T b);
     T max(T a, T b);
     T add(T a, T b);
