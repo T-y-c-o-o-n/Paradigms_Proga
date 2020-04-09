@@ -1,11 +1,10 @@
 package expression.unary;
 
-import expression.AbstractBinarOper;
+import expression.binary.AbstractBinarOper;
 import expression.CommonExpression;
 import expression.Oper;
 
 import java.util.EnumSet;
-import java.util.List;
 
 public class Divide extends AbstractBinarOper {
 	private static final EnumSet<Oper> firstArgsToAllow = EnumSet.of(Oper.MUL, Oper.DIV);

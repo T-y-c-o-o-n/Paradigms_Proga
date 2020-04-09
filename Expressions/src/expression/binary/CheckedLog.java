@@ -1,13 +1,10 @@
 package expression.binary;
 
-import expression.AbstractBinarOper;
 import expression.CommonExpression;
 import expression.Oper;
-import expression.exceptions.CalculationException;
 import expression.exceptions.LogArgumentsException;
 
 import java.util.EnumSet;
-import java.util.List;
 
 public class CheckedLog extends AbstractBinarOper {
     private static final EnumSet<Oper> firstArgsToAllow = EnumSet.noneOf(Oper.class);

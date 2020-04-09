@@ -1,9 +1,7 @@
 package expression.binary;
 
-import expression.AbstractBinarOper;
 import expression.CommonExpression;
 import expression.Oper;
-import expression.binary.CheckedMultiply;
 import expression.exceptions.PowArgumentsException;
 
 import java.util.EnumSet;

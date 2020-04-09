@@ -1,6 +1,5 @@
 package expression.unary;
 
-import expression.AbstractUnarOper;
 import expression.CommonExpression;
 import expression.Oper;
 

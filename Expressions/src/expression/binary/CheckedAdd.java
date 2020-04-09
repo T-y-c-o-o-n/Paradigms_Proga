@@ -2,7 +2,6 @@ package expression.binary;
 
 import java.util.EnumSet;
 
-import expression.AbstractBinarOper;
 import expression.CommonExpression;
 import expression.Oper;
 
