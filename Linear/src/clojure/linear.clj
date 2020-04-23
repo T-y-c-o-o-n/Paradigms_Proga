@@ -1,21 +1,22 @@
-(defn v+ [v u] (mapv + v u))                                ; сделать с произвольным числом аргументов!!!
-(defn v- [v u] (mapv - v u))
-(defn v* [v u] (mapv * v u))
-(defn scalar [v u] (reduce + 0 (v* v u)))
-(defn vect [v u]
-      [(- (* (v 1) (u 2)) (* (v 2) (u 1)))
+(defn v+ [&vectors] (mapv + &vectors))                                ; сделать с произвольным числом аргументов!!!
+(defn v- [&vectors] (mapv - &vectors))
+(defn v* [&vectors] (mapv * &vectors))
+(defn scalar [&vectors] (reduce + 0 (v* &vectors)))
+(defn vect [&vectors] (reduce
+      (fn [v u] [(- (* (v 1) (u 2)) (* (v 2) (u 1)))
        (- (* (v 0) (u 2)) (* (v 2) (u 0)))
-       (- (* (v 0) (u 1)) (* (v 1) (u 0)))])
-(defn v*s [v s] (mapv (fn [a] (* s a)) v))
+       (- (* (v 0) (u 1)) (* (v 1) (u 0)))]) 
+      vectors))
+(defn v*s [v &scalars] (mapv (fn [a] (* a &scalars)) v))
 
-(defn m+ [A B] (mapv v+ A B))
-(defn m- [A B] (mapv v- A B))
-(defn m* [A B] (mapv v* A B))
-(defn m*s [A s] (mapv (fn [v] (v*s v s)) A))
-(defn m*v [A v] ())
-(defn m*m [A B] ())
+(defn m+ [&matrixes] (mapv v+ &matrixes))
+(defn m- [&matrixes] (mapv v- &matrixes))
+(defn m* [&matrixes] (mapv v* &matrixes))
+(defn m*s [A &scalars] (mapv (fn [v] (v*s v &scalars)) A))
+(defn m*v [A &vectors] ())
+(defn m*m [&matrixes] ())
 (defn transpose [A] (
                       def B =
                       ))
 
-(println (m*s [[60 80 90] [1 2 3]] 100))
+(println (m*s [[60 80 90] [1 2 3]] 100 100))
