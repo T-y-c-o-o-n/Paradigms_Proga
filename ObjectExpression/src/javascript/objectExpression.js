@@ -6,121 +6,85 @@ toString
 diff
 simplify
  */
-let zero = new Const(0);
-let one = new Const(1);
 
-//  Флекс со значениями
-const initValueProt = function(Val, fun, toStr, funDiff) {
-    Val.prototype.evaluate = fun;
-    Val.prototype.toString = toStr;
-    Val.prototype.diff = funDiff;
+// Общий дед для всех
+const makeNewExpressionType = function(evaluate, toString, diff) {
+    function Expression(...args) {
+        this.args = args;
+    }
+
+    Expression.prototype = Object.create(Object);
+    Expression.prototype.constructor = Expression;
+    Expression.prototype.evaluate = evaluate;
+    Expression.prototype.toString = toString;
+    Expression.prototype.diff = diff;
+
+    return Expression;
+};
+// :NOTE: this is not required by JS. If it's removed code still be compiling but logic lost.
+// User can forget to call this method
+// fixed
+const Const = makeNewExpressionType(function(x, y, z) { return this.args[0] },
+    function() { return this.args[0].toString() },
+    (par) => zero
+);
+// :NOTE: why it's not const?
+// fixed
+const zero = new Const(0);
+const one = new Const(1);
+const Variable = makeNewExpressionType(
+    function(x, y, z) { return this.args[0] === "x" ? x : this.args[0] === "y" ? y : z },
+    function() { return this.args[0] },
+    function(par) { return this.args[0] === par ? one : zero }
+);
+const AbstractOperation = makeNewExpressionType(
+    function(...vars) { return this.evaluateImpl( ...this.args.map(arg => arg.evaluate(...vars))) },
+    function() { return this.args.join(" ") + " " + this.op },
+    function(par) { return this.diffImpl(...this.args, par) }
+);
+// Специально для каждой операции
+const makeNewOperation = function(evaluateImpl, op, diffImpl) {
+    function Operation(...args) { AbstractOperation.call(this, ...args); }
+
+    Operation.prototype = Object.create(AbstractOperation.prototype);
+    Operation.prototype.constructor = Operation;
+    Operation.prototype.evaluateImpl = evaluateImpl;
+    Operation.prototype.op = op;
+    Operation.prototype.diffImpl = diffImpl;
+
+    return Operation
 };
 
-function Const(val) {
-    this.val = val;
-}
-function Variable(view) {
-    this.view = view;
-}
-
-initValueProt(Const,
-    function() { return this.val; },
-function() { return this.val.toString(); },
-function(par) {return zero}
+const Add = makeNewOperation((a, b) => a + b,"+",
+    (a, b, par) => new Add(a.diff(par), b.diff(par)));
+const Subtract = makeNewOperation((a, b) => a - b,"-",
+    (a, b, par) => new Subtract(a.diff(par), b.diff(par))
 );
-initValueProt(Variable,
-function(x, y, z) { return this.view === "x" ? x : this.view === "y" ? y : z; },
-function() { return this.view; },
-function(par) { return par === this.view ? one : zero; }
+const Multiply = makeNewOperation((a, b) => a * b,"*",
+    (a, b, par) => new Add(
+        new Multiply(a.diff(par), b),
+        new Multiply(a, b.diff(par)))
 );
-
-//  Теперь флекс с операторами
-function Operation(...args) {
-    this.args = args;
-}
-Operation.prototype.evaluate = function(x, y, z) {
-    return this.calc(...this.args.map(arg => arg.evaluate(x, y, z)));
-};
-Operation.prototype.toString = function() {
-    return this.args.reduce((a, b) => a.toString() + " " + b.toString()) + this.op;
-};
-const initOperationPrototype = function(Oper, view, fun, funDiff) {
-    Oper.prototype = Object.create(Operation.prototype);
-    Oper.prototype.op = view;
-    Oper.prototype.calc = fun;
-    Oper.prototype.diff = funDiff;
-};
-
-function Add(arg1, arg2) {
-    Operation.call(this, arg1, arg2);
-}
-function Subtract(arg1, arg2) {
-    Operation.call(this, arg1, arg2);
-}
-function Multiply(arg1, arg2) {
-    Operation.call(this, arg1, arg2);
-}
-function Divide(arg1, arg2) {
-    Operation.call(this, arg1, arg2);
-}
-function Negate(arg) {
-    Operation.call(this, arg);
-}
-function Ln(arg) {
-    Operation.call(this, arg);
-}
-function Log(arg1, arg2) {
-    Operation.call(this, arg1, arg2);
-}
-function Power(arg1, arg2) {
-    Operation.call(this, arg1, arg2);
-}
-
-initOperationPrototype(Add, " +", (a, b) => a + b,
-    function(par) { return new Add(this.args[0].diff(par), this.args[1].diff(par)); }
+const Divide = makeNewOperation((a, b) => a / b,"/",
+    (a, b, par) => new Divide(
+            new Subtract(new Multiply(a.diff(par), b), new Multiply(a, b.diff(par))),
+            new Multiply(b, b)
+        )
 );
-initOperationPrototype(Subtract," -", (a, b) => a - b,
-    function(par) {
-    return new Subtract(this.args[0].diff(par), this.args[1].diff(par));
-}
+const Negate = makeNewOperation(a => -a,"negate",
+    (a, par) => new Negate(a.diff(par))
 );
-initOperationPrototype(Multiply," *",(a, b) => a * b,
-    function(par) {
-    return new Add(
-        new Multiply(this.args[0].diff(par), this.args[1]),
-        new Multiply(this.args[0], this.args[1].diff(par)));
-}
+const Ln = makeNewOperation(a => Math.log(Math.abs(a)),"ln",
+    (a, par) => new Divide(a.diff(par), a)
 );
-initOperationPrototype(Divide," /",(a, b) => a / b,
-    function(par) {
-    return new Divide(
-        new Subtract(new Multiply(this.args[0].diff(par), this.args[1]), new Multiply(this.args[0], this.args[1].diff(par))),
-        new Multiply(this.args[1], this.args[1])
-    );
-}
+const Log = makeNewOperation((a, b) => Math.log(Math.abs(b)) / Math.log(Math.abs(a)),"log",
+    (a, b, par) => new Divide(new Ln(b), new Ln(a)).diff(par)
 );
-initOperationPrototype(Negate," negate", a => -a,
-    function(par) {
-    return new Negate(this.args[0].diff(par));
-}
-);
-initOperationPrototype(Ln," ln", a => Math.log(Math.abs(a)),
-    function(par) {
-    return new Divide(this.args[0].diff(par), this.args[0]);
-}
-);
-initOperationPrototype(Log," log",(a, b) => Math.log(Math.abs(b)) / Math.log(Math.abs(a)),
-    function(par) {
-    return new Divide(new Ln(this.args[1]), new Ln(this.args[0])).diff(par);
-}
-);
-initOperationPrototype(Power," pow", Math.pow,
-    function(par) {
-    return new Multiply(this, new Add(
-        new Multiply(this.args[1].diff(par), new Ln(this.args[0])),
-        new Multiply(this.args[1], new Divide(this.args[0].diff(par), this.args[0]))
-    ));
-}
+const Power = makeNewOperation(Math.pow,"pow",
+    function(a, b, par) { return new Multiply(this, new Add(
+        new Multiply(b.diff(par), new Ln(a)),
+        new Multiply(b, new Divide(a.diff(par), a))
+    )) }
 );
 
 //  а теперь парсер
@@ -154,3 +118,28 @@ const parse = function(source) {
     }
     return stack.pop();
 };
+
+let a = new Add(new Const(90), new Variable("y"));
+
+console.log(a.toString());
+
+// let test = new Add(new Variable("z"), new Const(5));
+// let test = new Variable("z");
+
+/*for (let part in test) {
+    console.log(part);
+}*/
+/*
+console.log(test);
+
+console.log(test instanceof Add);
+console.log(test instanceof AbstractOperation);
+console.log(test instanceof makeNewOperation);
+console.log(test instanceof initExpressionPrototype);
+
+console.log(test.toString());
+console.log(test.evaluate(1, 2, 3));
+console.log(test.diff("z").toString());
+*/
+
+// :NOTE: homework not found :(
