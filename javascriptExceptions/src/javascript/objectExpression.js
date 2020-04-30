@@ -1,8 +1,6 @@
 "use strict";
-
-
 // Общий дед для всех
-const makeNewExpressionType = function(evaluate, toString, toPrefix, toPostfix, diff) {
+const makeNewExpressionType = function(evaluate, diff, toString, prefix, toPostfix) {
     function Expression(...args) {
         this.args = args;
     }
@@ -10,33 +8,34 @@ const makeNewExpressionType = function(evaluate, toString, toPrefix, toPostfix, 
     Expression.prototype = Object.create(Object);
     Expression.prototype.constructor = Expression;
     Expression.prototype.evaluate = evaluate;
-    Expression.prototype.toString = toString;
-    Expression.prototype.toPrefix = toPrefix;
-    Expression.prototype.toPostfix = toPostfix;
     Expression.prototype.diff = diff;
+    Expression.prototype.toString = toString;
+    Expression.prototype.prefix = prefix;
+    Expression.prototype.toPostfix = toPostfix;
 
     return Expression;
 };
 const Const = makeNewExpressionType(function(x, y, z) { return this.args[0] },
+    (par) => zero,
     function() { return this.args[0].toString() },
     function() { return this.args[0].toString() },
-    function() { return this.args[0].toString() },
-    (par) => zero
+    function() { return this.args[0].toString() }
 );
 const zero = new Const(0);
 const one = new Const(1);
 const Variable = makeNewExpressionType(
     function(x, y, z) { return this.args[0] === "x" ? x : this.args[0] === "y" ? y : z },
+    function(par) { return this.args[0] === par ? one : zero },
     function() { return this.args[0] },
     function() { return this.args[0] },
-    function(par) { return this.args[0] === par ? one : zero }
+function() { return this.args[0] }
 );
 const AbstractOperation = makeNewExpressionType(
     function(...vars) { return this.evaluateImpl( ...this.args.map(arg => arg.evaluate(...vars))) },
+    function(par) { return this.diffImpl(...this.args, par) },
     function() { return this.args.join(" ") + " " + this.op },
-    function() { return '(' + this.op + this.args.reduce((acc, tmp) => acc + ' ' + tmp.toPrefix(), '') + ')' },
-    function() { return '(' + this.toString() + ')' },
-    function(par) { return this.diffImpl(...this.args, par) }
+    function() { return '(' + this.op + this.args.reduce((acc, tmp) => acc + ' ' + tmp.prefix(), '') + ')' },
+    function() { return '(' + this.args.reduce((acc, tmp) => acc + ' ' + tmp.prefix(), '') + this.op + ')' }
 );
 // Специально для каждой операции
 const makeNewOperation = function(evaluateImpl, op, diffImpl) {
@@ -106,7 +105,6 @@ const parser = (() => {
     };
 
     const num = /\d/;
-
     let source;
     let pos;
     let ch;
@@ -129,7 +127,6 @@ const parser = (() => {
 
     const parse = function(string, mode) {
         source = string;
-
         pos = -1;
         nextChar();
         let expr = parseArg(mode);
@@ -198,9 +195,7 @@ const parser = (() => {
 
     const parseConst = function (wasNegated) {
         let val = wasNegated ? "-" : "";
-        while (testNum()) {
-            val += getChar();
-        }
+        while (testNum()) { val += getChar(); }
         return new Const(parseInt(val));
     };
 
@@ -260,8 +255,8 @@ const parser = (() => {
     }
 })();
 
-let test = parsePrefix("(+ 2 y)");
-console.log(test.toPrefix());
+let test = parsePrefix("(- (+ 2 y) (* 3 z))");
+console.log(test.prefix());
 
 // let test = new Add(new Variable("z"), new Const(5));
 // let test = new Variable("z");
