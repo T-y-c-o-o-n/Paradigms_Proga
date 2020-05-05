@@ -1,6 +1,6 @@
 "use strict";
 // Общий дед для всех
-const makeNewExpressionType = function(evaluate, diff, toString, prefix, toPostfix) {
+const makeNewExpressionType = function(evaluate, diff, toString, prefix, postfix) {
     function Expression(...args) {
         this.args = args;
     }
@@ -11,7 +11,7 @@ const makeNewExpressionType = function(evaluate, diff, toString, prefix, toPostf
     Expression.prototype.diff = diff;
     Expression.prototype.toString = toString;
     Expression.prototype.prefix = prefix;
-    Expression.prototype.toPostfix = toPostfix;
+    Expression.prototype.postfix = postfix;
 
     return Expression;
 };
@@ -50,30 +50,31 @@ const makeNewOperation = function(evaluateImpl, op, diffImpl) {
     return Operation
 };
 
-const Add = makeNewOperation((a, b) => a + b,"+",
-    (a, b, par) => new Add(a.diff(par), b.diff(par)));
+const sum = (...arr) => arr.reduce((acc, tmp) => acc + tmp, 0);
+const Add = makeNewOperation(sum,"+",
+    (par, ...args) => new Add(args.map(arg => arg.diff(par))));
 const Subtract = makeNewOperation((a, b) => a - b,"-",
-    (a, b, par) => new Subtract(a.diff(par), b.diff(par))
+    (par, a, b) => new Subtract(a.diff(par), b.diff(par))
 );
 const Multiply = makeNewOperation((a, b) => a * b,"*",
-    (a, b, par) => new Add(
+    (par, a, b) => new Add(
         new Multiply(a.diff(par), b),
         new Multiply(a, b.diff(par)))
 );
 const Divide = makeNewOperation((a, b) => a / b,"/",
-    (a, b, par) => new Divide(
+    (par, a, b) => new Divide(
         new Subtract(new Multiply(a.diff(par), b), new Multiply(a, b.diff(par))),
         new Multiply(b, b)
     )
 );
 const Negate = makeNewOperation(a => -a,"negate",
-    (a, par) => new Negate(a.diff(par))
+    (par, a) => new Negate(a.diff(par))
 );
 const Ln = makeNewOperation(a => Math.log(Math.abs(a)),"ln",
-    (a, par) => new Divide(a.diff(par), a)
+    (par, a) => new Divide(a.diff(par), a)
 );
 const Log = makeNewOperation((a, b) => Math.log(Math.abs(b)) / Math.log(Math.abs(a)),"log",
-    (a, b, par) => new Divide(new Ln(b), new Ln(a)).diff(par)
+    (par, a, b) => new Divide(new Ln(b), new Ln(a)).diff(par)
 );
 const Power = makeNewOperation(Math.pow,"pow",
     function(a, b, par) { return new Multiply(this, new Add(
@@ -81,6 +82,14 @@ const Power = makeNewOperation(Math.pow,"pow",
         new Multiply(b, new Divide(a.diff(par), a))
     )) }
 );
+const Exp = makeNewOperation(Math.exp, "exp", function(par, arg) { return new Multiply(arg.diff(par), this) });
+const SumExp = makeNewOperation(
+    sum((...args) => args.map(Math.exp)),
+    "sumexp",
+    (par, ...args) => new Add(args.map((arg) => new Multiply(new Exp(arg), arg.diff(par))))
+);
+const SoftMax = makeNewOperation((...args) => Math.exp(args[0]) / sum(args.map(Math.exp)), "softmax",
+    (par, ...args) => new Divide(new Exp(args[0]), new SumExp(...args)).diff(par));
 
 const parse = (string) => parser.parse(string);
 const parsePrefix = (string) => parser.parsePrefix(string);
@@ -101,7 +110,10 @@ const parser = (() => {
         "/": [Divide, 2],
         "negate": [Negate, 1],
         "log": [Log, 2],
-        "pow": [Power, 2]
+        "pow": [Power, 2],
+        "exp": [Exp, 1],
+        "sumexp": [SumExp, -1],
+        "softmax": [SoftMax, -1]
     };
 
     const num = /\d/;
@@ -126,6 +138,7 @@ const parser = (() => {
     };
 
     const parse = function(string, mode) {
+        console.log(string);
         source = string;
         pos = -1;
         nextChar();
@@ -168,6 +181,9 @@ const parser = (() => {
             if (parsed === undefined) {
                 throw new Error("expected operand");
             }
+            if (!test(' ') && ch !== '(' && ch !== ')') {
+                throw new Error("unexpected symbol");
+            }
         }
         let args = [];
         while (true) {
@@ -178,10 +194,22 @@ const parser = (() => {
                     return new parsed[0](...args);
                 }
             }
-            args.push(parseArg(mode));
+            if (ch === ')') {
+                if (mode === "prefix") {
+                    if (parsed[1] === -1) {
+                        return new parsed[0](...args);
+                    } else if (args.length !== parsed[1]) {
+                        console.log(args[0]);
+                        throw new Error("expected arguments for operation " + parsed[0].prototype.op + " in position " + pos);
+                    }
+                } else {
+                    throw new Error("expected operand");
+                }
+            }
             if (mode === "prefix" && args.length === parsed[1]) {
                 return new parsed[0](...args);
             }
+            args.push(parseArg(mode));
         }
     };
 
@@ -255,7 +283,7 @@ const parser = (() => {
     }
 })();
 
-let test = parsePrefix("(- (+ 2 y) (* 3 z))");
+let test = parsePrefix("(- 625   34 )");
 console.log(test.prefix());
 
 // let test = new Add(new Variable("z"), new Const(5));
