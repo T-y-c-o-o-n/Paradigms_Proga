@@ -1,20 +1,47 @@
 "use strict";
-// Общий дед для всех
-const makeNewExpressionType = function(evaluate, diff, toString, prefix, postfix) {
-    function Expression(...args) {
-        this.args = args;
+
+const expression = (() => {
+    const ExpressionTypeFactory = function(evaluate, diff, toString, prefix, postfix) {
+        function Expression(...args) {
+            this.args = args;
+        }
+        Expression.prototype = Object.create(Object);
+        Expression.prototype.constructor = Expression;
+        Expression.prototype.evaluate = evaluate;
+        Expression.prototype.diff = diff;
+        Expression.prototype.toString = toString;
+        Expression.prototype.prefix = prefix;
+        Expression.prototype.postfix = postfix;
+        return Expression;
+    };
+
+    const AbstractOperation = makeNewExpressionType(
+        function(...vars) { return this.evaluateImpl( ...this.args.map(arg => arg.evaluate(...vars))) },
+        function(par) { return this.diffImpl(...this.args, par) },
+        function() { return this.args.join(" ") + " " + this.op },
+        function() { return '(' + this.op + this.args.reduce((acc, tmp) => acc + ' ' + tmp.prefix(), '') + ')' },
+        function() { return '(' + this.args.reduce((acc, tmp) => acc + ' ' + tmp.prefix(), '') + this.op + ')' }
+    );
+
+    const OperationFactory = function(evaluateImpl, op, diffImpl) {
+        function Operation(...args) { AbstractOperation.call(this, ...args); }
+        Operation.prototype = Object.create(AbstractOperation.prototype);
+        Operation.prototype.constructor = Operation;
+        Operation.prototype.evaluateImpl = evaluateImpl;
+        Operation.prototype.op = op;
+        Operation.prototype.diffImpl = diffImpl;
+        return Operation
+    };
+
+    return {
+        makeNewExpressionType: ExpressionTypeFactory,
+        makeNewOperation: OperationFactory
     }
+})();
 
-    Expression.prototype = Object.create(Object);
-    Expression.prototype.constructor = Expression;
-    Expression.prototype.evaluate = evaluate;
-    Expression.prototype.diff = diff;
-    Expression.prototype.toString = toString;
-    Expression.prototype.prefix = prefix;
-    Expression.prototype.postfix = postfix;
+const makeNewExpressionType = expression.makeNewExpressionType;
+const makeNewOperation = expression.makeNewOperation;
 
-    return Expression;
-};
 const Const = makeNewExpressionType(function(x, y, z) { return this.args[0] },
     (par) => zero,
     function() { return this.args[0].toString() },
@@ -30,25 +57,6 @@ const Variable = makeNewExpressionType(
     function() { return this.args[0] },
 function() { return this.args[0] }
 );
-const AbstractOperation = makeNewExpressionType(
-    function(...vars) { return this.evaluateImpl( ...this.args.map(arg => arg.evaluate(...vars))) },
-    function(par) { return this.diffImpl(...this.args, par) },
-    function() { return this.args.join(" ") + " " + this.op },
-    function() { return '(' + this.op + this.args.reduce((acc, tmp) => acc + ' ' + tmp.prefix(), '') + ')' },
-    function() { return '(' + this.args.reduce((acc, tmp) => acc + ' ' + tmp.prefix(), '') + this.op + ')' }
-);
-// Специально для каждой операции
-const makeNewOperation = function(evaluateImpl, op, diffImpl) {
-    function Operation(...args) { AbstractOperation.call(this, ...args); }
-
-    Operation.prototype = Object.create(AbstractOperation.prototype);
-    Operation.prototype.constructor = Operation;
-    Operation.prototype.evaluateImpl = evaluateImpl;
-    Operation.prototype.op = op;
-    Operation.prototype.diffImpl = diffImpl;
-
-    return Operation
-};
 
 const sum = (...arr) => arr.reduce((acc, tmp) => acc + tmp, 0);
 const Add = makeNewOperation(sum,"+",
@@ -91,11 +99,10 @@ const SumExp = makeNewOperation(
 const SoftMax = makeNewOperation((...args) => Math.exp(args[0]) / sum(args.map(Math.exp)), "softmax",
     (par, ...args) => new Divide(new Exp(args[0]), new SumExp(...args)).diff(par));
 
-const parse = (string) => parser.parse(string);
-const parsePrefix = (string) => parser.parsePrefix(string);
-const parsePostfix = (string) => parser.parsePostfix(string);
+const parse = parser.parsePoland;
+const parsePrefix = parser.parsePrefix;
+const parsePostfix = parser.parsePostfix;
 
-//  а теперь парсер
 const parser = (() => {
     const parseVariable = {
         "x": new Variable("x"),
@@ -121,8 +128,7 @@ const parser = (() => {
     let pos;
     let ch;
 
-    const parsePoland = function (string) {
-        source = string;
+    const parsePoland = function (source) {
         let stack = [];
         for (let token of source.split(" ").filter(word => word.length > 0)) {
             if (token in parseOperation) {
@@ -138,7 +144,7 @@ const parser = (() => {
     };
 
     const parse = function(string, mode) {
-        console.log(string);
+        // console.log(string);
         source = string;
         pos = -1;
         nextChar();
@@ -181,9 +187,9 @@ const parser = (() => {
             if (parsed === undefined) {
                 throw new Error("expected operand");
             }
-            if (!test(' ') && ch !== '(' && ch !== ')') {
+            /*if (!test(' ') && ch !== '(' && ch !== ')') {
                 throw new Error("unexpected symbol");
-            }
+            }*/
         }
         let args = [];
         while (true) {
@@ -194,7 +200,7 @@ const parser = (() => {
                     return new parsed[0](...args);
                 }
             }
-            if (ch === ')') {
+            /*if (ch === ')') {
                 if (mode === "prefix") {
                     if (parsed[1] === -1) {
                         return new parsed[0](...args);
@@ -205,7 +211,7 @@ const parser = (() => {
                 } else {
                     throw new Error("expected operand");
                 }
-            }
+            }*/
             if (mode === "prefix" && args.length === parsed[1]) {
                 return new parsed[0](...args);
             }
@@ -277,7 +283,7 @@ const parser = (() => {
     };
 
     return {
-        parse: parsePoland,
+        parsePoland: parsePoland,
         parsePrefix: (string) => parse(string, "prefix"),
         parsePostfix: (string) => parse(string, "postfix")
     }
