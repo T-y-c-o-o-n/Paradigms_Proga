@@ -1,8 +1,8 @@
 ; just delay!
 (defn vec-op [op] (fn [& vectors] (apply mapv op vectors)))
-(defn v+ (vec-op +))
-(defn v- (vec-op -))
-(defn v* (vec-op *))
+(def v+ (vec-op +))
+(def v- (vec-op -))
+(def v* (vec-op *))
 (defn scalar [& vectors] (reduce + 0 (apply v* vectors)))
 (defn vector-mul [v u] [(- (* (v 1) (u 2)) (* (v 2) (u 1)))
            (- (* (v 0) (u 2)) (* (v 2) (u 0)))
@@ -11,14 +11,25 @@
 (defn v*s [v & scalars] (mapv (fn [a] (apply * a scalars)) v))
 
 (defn mat-op [op] (fn [& matrices] (apply mapv op matrices)))
-(defn m+ (mat-op v+))
-(defn m- (mat-op v-))
-(defn m* (mat-op v*))
+(def m+ (mat-op v+))
+(def m- (mat-op v-))
+(def m* (mat-op v*))
 (defn m*s [A & scalars] (mapv (fn [v] (apply v*s v scalars)) A))
 (defn m*v [A v] (apply v+ (mapv v*s A v)))
 (defn matrix-mul [A B] (mapv (fn [v] (m*v A v)) B))
 (defn m*m [& matrices] (reduce matrix-mul matrices))
 (defn transpose [A] (apply mapv vector A))
+
+(defn tensors? [& args] (apply and (mapv vector? args)))
+(defn ten-op [op-end-of-rec] (fn me [& comps]
+                     (if (apply tensors? comps)
+                       (apply mapv me comps)
+                       (apply op-end-of-rec comps))
+                               ))
+(def t+ (ten-op +))
+
+(println (vector? [0]))
+(println (tensors? [0]))
 
 ;(println (scalar [60 80 90] [1 2 3] [100 100 0]))
 ;(def vectors [[60 80 90] [1 2 3] [100 100 0]])
