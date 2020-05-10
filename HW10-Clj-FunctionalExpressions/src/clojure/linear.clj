@@ -106,7 +106,7 @@
 (println (str "tensor? " (tensor? ten)))
 (def shape (get-shape ten))
 (println (str "shape " shape))
-(println (str "shape? " (check-shape ten shape)))
+(println (str "shape? " (check-shape-impl ten shape 0)))
 
 
 ; (println (check-shape [[[1] [2] [3]] [[4] [5] [6]]] shape))

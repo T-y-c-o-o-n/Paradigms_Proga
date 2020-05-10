@@ -14,22 +14,22 @@
   (and (vector? v) (every? number? v)))
 (defn vec-op [op]
   (fn [& vectors]
-    {:pre [(and (every? num-vec? vectors) (apply sizes-eq? vectors))]}
+    {:pre [(every? num-vec? vectors) (apply sizes-eq? vectors)]}
     (apply mapv op vectors)))
 (def v+ (vec-op +))
 (def v- (vec-op -))
 (def v* (vec-op *))
 (defn scalar [& vectors]
-  {:pre [(and (every? num-vec? vectors) (apply sizes-eq? vectors))]}
+  {:pre [(every? num-vec? vectors) (apply sizes-eq? vectors)]}
   (reduce + 0 (apply v* vectors)))
 (defn vec-mul [v u] [(- (* (v 1) (u 2)) (* (v 2) (u 1)))
                      (- (* (v 0) (u 2)) (* (v 2) (u 0)))
                      (- (* (v 0) (u 1)) (* (v 1) (u 0)))])
 (defn vect [& vectors]
-  {:pre [(and (every? num-vec? vectors) (apply sizes-eq? vectors))]}
+  {:pre [(every? num-vec? vectors) (apply sizes-eq? vectors)]}
   (reduce vec-mul vectors))
 (defn v*s [v & scalars]
-  {:pre [(and (num-vec? v) (every? number? scalars))]}
+  {:pre [(num-vec? v) (every? number? scalars)]}
   (mapv (fn [a] (apply * a scalars)) v))
 
 ; matrices
@@ -39,22 +39,22 @@
   (and (vector? m) (every? num-vec? m) (apply sizes-eq? m)))
 (defn mat-op [op]
   (fn [& matrices]
-    {:pre [(and (every? num-mat? matrices) (apply sizes-eq? matrices) (apply sizes-eq? (mapv (fn [m] (m 0)) matrices)))]}
+    {:pre [(every? num-mat? matrices) (apply sizes-eq? matrices) (apply sizes-eq? (mapv (fn [m] (m 0)) matrices))]}
     (apply mapv op matrices)))
 (def m+ (mat-op v+))
 (def m- (mat-op v-))
 (def m* (mat-op v*))
 (defn m*s [A & scalars]
-  {:pre [(and (num-mat? A) (every? number? scalars))]}
+  {:pre [(num-mat? A) (every? number? scalars)]}
   (mapv (fn [v] (apply v*s v scalars)) A))
 (defn m*v [A v]
-  {:pre [(and (num-mat? A) (num-vec? v) (sizes-eq? [A v]))]}
+  {:pre [(num-mat? A) (num-vec? v) (sizes-eq? [A v])]}
   (apply v+ (mapv v*s A v)))
 (defn mat-mul [A B]
   {:pre [(= (get-size 0 A) (get-size 1 B))]}
   (mapv (fn [v] (m*v A v)) B))
 (defn m*m [& matrices]
-  {:pre [(and (every? num-mat? matrices) (true))]}
+  {:pre [(every? num-mat? matrices) (true)]}
   (reduce mat-mul matrices))
 (defn transpose [A]
   {:pre [(num-mat? A)]}
@@ -62,33 +62,44 @@
 
 ; tensors
 
-(defn check-shape-impl [t shape level]
-  {:pre [(and (vector? t) (num-vec? shape))]}
-  (if (= level (count shape))
-    (number? t)
-    (and
-      (vector? t)
-      (= (shape level) (count t))
-      (every? (fn [comp] (check-shape-impl comp shape (+ 1 level))) t))))
-(defn get-shape-impl [t array-to-fill]
-  (if (number? t)
-    array-to-fill
-    (get-shape-impl (t 0) (conj (conj array-to-fill (count t))))))
+(defn check-shape [t sh]
+  {:pre [(vector? t) (num-vec? sh)]}
+  (letfn [
+          (check-shape' [t shape level]
+            (if (= level (count shape))
+              (number? t)
+              (and
+                (vector? t)
+                (= (shape level) (count t))
+                (every? (fn [comp] (check-shape' comp shape (+ 1 level))) t))))
+          ]
+    (check-shape' t sh 0)))
+
 (defn get-shape [t]                                         ; should return nil if it is not tensor
-  {:pre [(vector? t)]}
+  {:pre [(or (number? t) (vector? t))]}
   "Return the array with lengths of axis. If argument is scalar it returns []"
-  (get-shape-impl t []))
+  (letfn [
+          (get-shape' [t array-to-fill]
+            (if (number? t)
+              array-to-fill
+              (get-shape' (t 0) (conj (conj array-to-fill (count t))))))
+
+          (shape-or-nil [t shape]
+            (if (check-shape t shape) shape nil))
+          ]
+    (shape-or-nil t (get-shape' t []))))
+
 (defn tensor? [t]
   (or
     (number? t)
     (and
       (vector? t)
       (every? tensor? t)
-      (check-shape-impl t (get-shape t) 0))))
+      (not (= nil (get-shape t)))))
 
 (defn ten-op [op-end-of-rec]
   (fn [& tensors]
-    {:pre [(and (every? tensor? tensors) (apply = (mapv get-shape tensors)))]}
+    {:pre [(every? tensor? tensors) (apply = (mapv get-shape tensors))]}
     (apply
       (fn rec-fun [& comps]
         (if (every? number? comps)
