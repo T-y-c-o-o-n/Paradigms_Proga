@@ -3,6 +3,15 @@
 [Условия домашних заданий](http://www.kgeorgiy.info/courses/paradigms/homeworks.html)
 
 
+## Домашнее задание 11. Объектные выражения на Clojure
+
+Модификации
+ * *Базовая*
+    * Код должен находиться в файле `expression.clj`.
+    * [Исходный код тестов](clojure/cljtest/object/ClojureObjectExpressionTest.java)
+        * Запускать c аргументом `easy` или `hard`
+
+
 ## Домашнее задание 10. Функциональные выражения на Clojure
 
 Модификации
@@ -10,6 +19,31 @@
     * Код должен находиться в файле `expression.clj`.
     * [Исходный код тестов](clojure/cljtest/functional/ClojureFunctionalExpressionTest.java)
         * Запускать c аргументом `easy` или `hard`
+ * *MinMax*. Дополнительно реализовать поддержку:
+    * операций произвольного числа аргументов:
+        * `min` – минимум, `(min 1 2 6)` равно 1;
+        * `max` – максимум, `(min 1 2 6)` равно 6;
+    * [Исходный код тестов](clojure/cljtest/functional/ClojureFunctionalMinMaxTest.java)
+ * *ExpLn*. Дополнительно реализовать поддержку:
+    * унарных операций:
+        * `exp` – экспонента, `(exp 8)` примерно равно 2981;
+        * `ln`  – натуральный логарифм абсолютной величины, `(ln -2981)` примерно равно 8.
+    * [Исходный код тестов](clojure/cljtest/functional/ClojureFunctionalExpLnTest.java)
+ * *MedAvg*. Дополнительно реализовать поддержку:
+    * операций произвольного числа аргументов:
+        * `med` – медиана, `(med 1 2 6)` равно 2;
+        * `avg` – среднее, `(avg 1 2 6)` равно 3;
+    * [Исходный код тестов](clojure/cljtest/functional/ClojureFunctionalMedAvgTest.java)
+ * *PwLg*. Дополнительно реализовать поддержку:
+    * бинарных операций:
+        * `pw` – возведение в степень, `(pow 2 3)` равно 8;
+        * `lg` – логарифм абсолютной величины по основанию абсолютной величины, `(lg -8 -2)` равно 3.
+    * [Исходный код тестов](clojure/cljtest/functional/ClojureFunctionalPwLgTest.java)
+ * *SumexpSoftmax*. Дополнительно реализовать поддержку:
+    * операций произвольного числа аргументов:
+        * `sumexp` – сумма экспонент, `(sumexp 8 8 9)` примерно равно 14065;
+        * `softmax` – [softmax](https://ru.wikipedia.org/wiki/Softmax) первого аргумента, `(softmax 1 2 3)` примерно равно 0.09;
+    * [Исходный код тестов](clojure/cljtest/functional/ClojureFunctionalSumexpSoftmaxTest.java)
 
 
 ## Домашнее задание 9. Линейная алгебра на Clojure
@@ -103,6 +137,12 @@
  * [Порядки вычислений](clojure/examples/2_3_evaluation-orders.clj)
  * [Потоки](clojure/examples/2_4_streams.clj)
  * [Отображения и множества](clojure/examples/2_5_maps.clj)
+
+Лекция 3. Объекты и вычисления
+ * [Прототипное наследование](clojure/examples/3_1_js-objects.clj)
+ * [Классы](clojure/examples/3_2_java-objects.clj)
+ * [Изменяемое состояние](clojure/examples/3_3_mutable-state.clj)
+ * [Числа Чёрча](clojure/examples/3_4_church.clj)
 
 
 ## Домашнее задание 8. Обработка ошибок на JavaScript
