@@ -1,41 +1,37 @@
-; just delay!
+; code for passing!
 
-; vectors
 (defn sizes-eq? [& args]
   "checks if all the vector has the same length"
   {:pre [(every? vector? args)]}
   (apply = (mapv count args)))
+; vectors
 (defn num-vec? [v]
   "checks if argument is numeric vector"
   (and (vector? v) (every? number? v)))
 (defn vec-op [op]
   (fn [& vectors]
     {:pre [(every? num-vec? vectors) (apply sizes-eq? vectors)]
-     :post [(num-vec? %) (= (count (vectors 0)) (count %))]}
+     :post [(num-vec? %) (apply sizes-eq? % vectors)]}
     (apply mapv op vectors)))
 (def v+ (vec-op +))
 (def v- (vec-op -))
 (def v* (vec-op *))
 (defn scalar [v u]
   {:pre [(num-vec? v) (num-vec? u) (sizes-eq? v u)]
-   :post [(number? scalar)]}
+   :post [(number? %)]}
   (apply + (v* v u)))
-(defn vec-mul [v u]
-  {:pre [(num-vec? v) (num-vec? u) (= 3 (count v) (count u))]
-   :post [(num-vec? %) (= 3 (count %))]}
-  (letfn [
-          (minor [i j] (- (* (v i) (u j)) (* (v j) (u i))))
-          ]
-    ([(minor 1 2)
-      (minor 0 2)
-      (minor 0 1)])))
-(defn vect [v & vectors]
+(defn vect [& vectors]
   {:pre [(every? num-vec? vectors) (apply sizes-eq? [0 0 0] vectors)]
    :post [(num-vec? %) (= 3 (count %))]}
-  (reduce vec-mul v vectors))
+  (letfn [(vec-mul [v u]
+            (letfn [(minor [i j] (- (* (v i) (u j)) (* (v j) (u i))))]
+              [(minor 1 2)
+               (minor 2 0)
+               (minor 0 1)]))]
+    (reduce vec-mul vectors)))
 (defn v*s [v & scalars]
   {:pre [(num-vec? v) (every? number? scalars)]
-   :post [(num-vec? %) (= (count v) (count %))]}
+   :post [(num-vec? %) (sizes-eq? v %)]}
   (let [prod (apply * scalars)]
    (mapv (partial * prod) v)))
 ; matrices
@@ -44,26 +40,27 @@
   (and (vector? m) (every? num-vec? m) (apply sizes-eq? m)))
 (defn mat-op [op]
   (fn [& matrices]
-    {:pre [(every? num-mat? matrices) (apply sizes-eq? matrices) (apply sizes-eq? (mapv (fn [m] (m 0)) matrices))]}
-    :post [(num-mat? %) (= (count (matrices 0)) (count %)) (= (count ((matrices 0) 0)) (count (% 0)))]
+    {:pre [(every? num-mat? matrices) (apply sizes-eq? matrices) (apply sizes-eq? (mapv #(% 0) matrices))]
+    :post [(num-mat? %) (apply sizes-eq? matrices) (apply sizes-eq? (% 0) (mapv #(% 0) matrices))]}
     (apply mapv op matrices)))
 (def m+ (mat-op v+))
 (def m- (mat-op v-))
 (def m* (mat-op v*))
 (defn m*s [A & scalars]
   {:pre [(num-mat? A) (every? number? scalars)]}
-  (let [prod (apply * scalars)] (mapv (partial * prod) A)))
+  (let [prod (apply * scalars)] (mapv #(v*s % prod) A)))
 (defn m*v [A v]
-  {:pre [(num-mat? A) (num-vec? v) (sizes-eq? [A v])]}
-  (apply v+ (mapv v*s A v)))
-(defn mat-mul [A B]
-  {:pre [(num-mat? A) (num-mat? B) (= (count A) (count (B 0)))]
-   :post [(num-mat? %) (= (count B) (count %)) (= (count (A 0)) (count (% 0)))]}
-   (mapv (fn [v] (m*v A v)) B))
+  {:pre [(num-mat? A) (num-vec? v) (sizes-eq? [(count (A 0)) v])]}
+  (mapv (partial scalar v) A))
+(defn v*m [v A]
+  "multiplies numeric vector-string vector on numeric matrix"
+  {:pre [(num-vec? v) (num-mat? A) (sizes-eq? [v (A 0)])]}
+  (apply v+ (mapv #(v*s %2 %1) v A)))
 (defn m*m [& matrices]
   {:pre [(every? num-mat? matrices)]
    :post [(num-mat? %)]}
-  (reduce mat-mul matrices))
+  (letfn [(mat-mul [A B] {:pre [(sizes-eq? (A 0) B)]} (mapv #(v*m % B) A))]
+   (reduce mat-mul matrices)))
 (defn transpose [A]
   {:pre [(num-mat? A)]
    :post [(num-mat? %)]}
@@ -74,12 +71,12 @@
       (and (vector? comp) (every? consist-of-vecs-and-nums? comp))))
 (defn get-shape [t]
   {:pre [(consist-of-vecs-and-nums? t)]}
-  "Return the array with lengths of axis. If argument is scalar returns []"
+  "Returns vector with lengths of axis. If argument is scalar returns []. If polimeric matrix t is not vector returns nil"
   (letfn [
-          (get-shape' [comp array-to-fill]
+          (get-shape' [comp vec-to-fill]
             (if (number? comp)
-              array-to-fill
-              (get-shape' (comp 0) (conj array-to-fill (count comp)))))
+              vec-to-fill
+              (get-shape' (comp 0) (conj vec-to-fill (count comp)))))
           (check-shape [comp shape level]
             (if (= level (count shape))
               (number? comp)
@@ -93,7 +90,7 @@
 (defn tensor? [t]
   (and
     (consist-of-vecs-and-nums? t)
-    (not (= (get-shape t) nil))))
+    (not (nil? (get-shape t)))))
 (defn ten-op [op-end-of-rec]
   (fn [& tensors]
     {:pre [(every? tensor? tensors) (apply = (mapv get-shape tensors))]
@@ -114,12 +111,25 @@
 (println (str "tensor? " (tensor? t)))
 (println (str "shape - " (get-shape t)))
 
-
-(println (scalar [60 80 90] [1 2 3]))
-(def vectors [[60 80 90] [1 2 3] [100 100 0]])
-(println (apply v* [[60 80 90] [1 2 3] [100 100 0]]))
-(println (m- [[2 0] [-3 45] [900 -12]] [[54 2] [7 -0] [+0 34]] [[43 34] [1 -1] [29 8]]))
-(println (m*s [[2 0] [-3 45] [900 -12]] 1 2 -30))
-(println (m*v [[2 0] [-3 45] [900 -12] [21 0]] [2 -1 0 1]))
-(println (m*m [[1 0] [0 1]] [[13 -900] [0 1345]] [[1 0] [0 1]]))
-(println (transpose [[1 2] [3 4] [5 6] [7 8]]))
+(println (vect (vector 1 2 3) (vector 4 5 6)))
+(println (m*s [[1 2] [3 4] [5 6]] 4 90 0))
+(println (m*v [[2 0]
+               [5 7]
+               [2 9]
+               [0 -1]] [1 -1]))
+(println (v*m [1 2 3 4] [[2 0]
+                         [5 7]
+                         [2 9]
+                         [0 -1]]))
+(println (m*m [[1 2 3 4] [4 3 2 1] [100 100 100 0]] [[0 1]
+                                                     [2 9]
+                                                     [3 -10]
+                                                     [100 4]]))
+;(println (scalar [60 80 90] [1 2 3]))
+;(def vectors [[60 80 90] [1 2 3] [100 100 0]])
+;(println (apply v* [[60 80 90] [1 2 3] [100 100 0]]))
+;(println (m- [[2 0] [-3 45] [900 -12]] [[54 2] [7 -0] [+0 34]] [[43 34] [1 -1] [29 8]]))
+;(println (m*s [[2 0] [-3 45] [900 -12]] 1 2 -30))
+;(println (m*v [[2 0] [-3 45] [900 -12] [21 0]] [2 -1 0 1]))
+;(println (m*m [[1 0] [0 1]] [[13 -900] [0 1345]] [[1 0] [0 1]]))
+;(println (transpose [[1 2] [3 4] [5 6] [7 8]]))
