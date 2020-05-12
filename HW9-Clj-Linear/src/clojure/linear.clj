@@ -1,10 +1,16 @@
+; Solution stub
 ; code for passing!
 
+; Scalars
+(def s+ +)
+(def s- -)
+(def s* *)
+
+; vectors
 (defn sizes-eq? [& args]
   "checks if all the vector has the same length"
   {:pre [(every? vector? args)]}
   (apply = (mapv count args)))
-; vectors
 (defn num-vec? [v]
   "checks if argument is numeric vector"
   (and (vector? v) (every? number? v)))
@@ -34,7 +40,9 @@
    :post [(num-vec? %) (sizes-eq? v %)]}
   (let [prod (apply * scalars)]
    (mapv (partial * prod) v)))
+
 ; matrices
+
 (defn num-mat? [m]
   "checks if argument is numeric matrix"
   (and (vector? m) (every? num-vec? m) (apply sizes-eq? m)))
@@ -65,7 +73,25 @@
   {:pre [(num-mat? A)]
    :post [(num-mat? %)]}
   (apply mapv vector A))
+
+; 188 symbols for det
+(defn det [A]
+  "returns determinant of numeric square matrix"
+  {:pre [(num-mat? A) (sizes-eq? A (A 0))]
+   :post [number? %]}
+  (if (= 1 (count A))
+    ((A 0) 0)
+    (letfn [
+            (cut [v i] (vec (concat (subvec v 0 i) (subvec v (+ 1 i)))))
+            (minor [i j] (det (cut (mapv #(cut % j) A) i)))]
+      ((fn me [j]
+         (if (= (count A) j)
+           0
+           (- (* ((A 0) j) (minor 0 j)) (me (+ 1 j)))))
+       0))))
+
 ; tensors
+
 (defn consist-of-vecs-and-nums? [comp]
   (or (number? comp)
       (and (vector? comp) (every? consist-of-vecs-and-nums? comp))))
@@ -110,7 +136,6 @@
 (println t)
 (println (str "tensor? " (tensor? t)))
 (println (str "shape - " (get-shape t)))
-
 (println (vect (vector 1 2 3) (vector 4 5 6)))
 (println (m*s [[1 2] [3 4] [5 6]] 4 90 0))
 (println (m*v [[2 0]
@@ -125,6 +150,17 @@
                                                      [2 9]
                                                      [3 -10]
                                                      [100 4]]))
+(def A
+  [[1	-46	0	4	0]
+  [0	6	7	-100	233]
+  [45	10	11	12	3]
+  [13	0	15	16	-1]
+  [4	-46	-156	0	25]]
+  )
+
+(println (str "A = " A))
+(println (str "det A = " (det A)))                          ; -911034352
+
 ;(println (scalar [60 80 90] [1 2 3]))
 ;(def vectors [[60 80 90] [1 2 3] [100 100 0]])
 ;(println (apply v* [[60 80 90] [1 2 3] [100 100 0]]))
