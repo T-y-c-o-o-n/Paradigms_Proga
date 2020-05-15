@@ -61,7 +61,7 @@
   {:pre [(num-mat? A) (num-vec? v) (sizes-eq? [(count (A 0)) v])]}
   (mapv (partial scalar v) A))
 (defn v*m [v A]
-  "multiplies numeric vector-string vector on numeric matrix"
+  "multiplies numeric vector-string with numeric matrix"
   {:pre [(num-vec? v) (num-mat? A) (sizes-eq? [v (A 0)])]}
   (apply v+ (mapv #(v*s %2 %1) v A)))
 (defn m*m [& matrices]
@@ -77,8 +77,7 @@
 ; 188 symbols for det
 (defn det [A]
   "returns determinant of numeric square matrix"
-  {:pre [(num-mat? A) (sizes-eq? A (A 0))]
-   :post [number? %]}
+  {:pre [(num-mat? A) (sizes-eq? A (A 0))]}
   (if (= 1 (count A))
     ((A 0) 0)
     (letfn [
@@ -96,7 +95,8 @@
   (or (number? comp)
       (and (vector? comp) (every? consist-of-vecs-and-nums? comp))))
 (defn get-shape [t]
-  {:pre [(consist-of-vecs-and-nums? t)]}
+  {:pre [(consist-of-vecs-and-nums? t)]
+   :post [(or (nil? %) (num-vec? %))]}
   "Returns vector with lengths of axis. If argument is scalar returns []. If polimeric matrix t is not vector returns nil"
   (letfn [
           (get-shape' [comp vec-to-fill]
