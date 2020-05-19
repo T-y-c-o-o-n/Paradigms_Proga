@@ -1,5 +1,18 @@
 "use strict";
 
+let parseOperation = {
+    // "+": [Add, 2],
+    // "-": [Subtract, 2],
+    // "*": [Multiply, 2],
+    // "/": [Divide, 2],
+    // "negate": [Negate, 1],
+    // "log": [Log, 2],
+    // "pow": [Power, 2],
+    // "exp": [Exp, 1],
+    // "sumexp": [Sumexp, -1],
+    // "softmax": [Softmax, -1]
+};
+
 const expression = (() => {
     const ExpressionTypeFactory = function(evaluate, diff, toString, prefix, postfix) {
         function Expression(...args) {
@@ -19,17 +32,21 @@ const expression = (() => {
         function(...vars) { return this.evaluateImpl( ...this.args.map(arg => arg.evaluate(...vars))) },
         function(par) { return this.diffImpl(par, ...this.args) },
         function() { return this.args.join(" ") + " " + this.op },
-        function() { return '(' + this.op + this.args.reduce((acc, tmp) => acc + ' ' + tmp.prefix(), '') + ')' },
-        function() { return '(' + this.args.reduce((acc, tmp) => acc + ' ' + tmp.prefix(), '') + this.op + ')' }
+        function() { return '(' + this.op + ' ' + this.args.map(arg => arg.prefix()).join(' ') + ')' },
+        function() {
+            return '(' + this.args.map(arg => arg.postfix()).join(' ') + ' ' + this.op + ')'
+        }
     );
 
-    const OperationFactory = function(evaluateImpl, op, diffImpl) {
+    const OperationFactory = function(evaluateImpl, op, diffImpl, arity) {
         function Operation(...args) { AbstractOperation.call(this, ...args); }
         Operation.prototype = Object.create(AbstractOperation.prototype);
         Operation.prototype.constructor = Operation;
         Operation.prototype.evaluateImpl = evaluateImpl;
         Operation.prototype.op = op;
         Operation.prototype.diffImpl = diffImpl;
+
+        parseOperation[op] = [Operation, arity];
         return Operation
     };
 
@@ -60,44 +77,50 @@ function() { return this.args[0] }
 
 const sum = (...arr) => arr.reduce((acc, tmp) => acc + tmp, 0);
 const Add = makeNewOperation(sum,"+",
-    (par, a, b) => new Add(a.diff(par), b.diff(par)));
+    (par, a, b) => new Add(a.diff(par), b.diff(par)), 2);
 const Subtract = makeNewOperation((a, b) => a - b,"-",
-    (par, a, b) => new Subtract(a.diff(par), b.diff(par))
+    (par, a, b) => new Subtract(a.diff(par), b.diff(par)), 2
 );
 const Multiply = makeNewOperation((a, b) => a * b,"*",
     (par, a, b) => new Add(
         new Multiply(a.diff(par), b),
-        new Multiply(a, b.diff(par)))
+        new Multiply(a, b.diff(par))), 2
 );
 const Divide = makeNewOperation((a, b) => a / b,"/",
     (par, a, b) => new Divide(
         new Subtract(new Multiply(a.diff(par), b), new Multiply(a, b.diff(par))),
         new Multiply(b, b)
-    )
+    ), 2
 );
 const Negate = makeNewOperation(a => -a,"negate",
-    (par, a) => new Negate(a.diff(par))
+    (par, a) => new Negate(a.diff(par)), 1
 );
 const Ln = makeNewOperation(a => Math.log(Math.abs(a)),"ln",
-    (par, a) => new Divide(a.diff(par), a)
+    (par, a) => new Divide(a.diff(par), a), 1
 );
 const Log = makeNewOperation((a, b) => Math.log(Math.abs(b)) / Math.log(Math.abs(a)),"log",
-    (par, a, b) => new Divide(new Ln(b), new Ln(a)).diff(par)
+    (par, a, b) => new Divide(new Ln(b), new Ln(a)).diff(par), 2
 );
 const Power = makeNewOperation(Math.pow,"pow",
     function(par, a, b) { return new Multiply(this, new Add(
         new Multiply(b.diff(par), new Ln(a)),
         new Multiply(b, new Divide(a.diff(par), a))
-    )) }
+    )) }, 2
 );
-const Exp = makeNewOperation(Math.exp, "exp", function(par, arg) { return new Multiply(arg.diff(par), this) });
-const SumExp = makeNewOperation(
-    sum((...args) => args.map(Math.exp)),
+const Exp = makeNewOperation(Math.exp, "exp",
+    function(par, arg) { return new Multiply(arg.diff(par), this) }, 1
+);
+const Sumexp = makeNewOperation(
+    (...args) => sum(...args.map(Math.exp)),
     "sumexp",
-    (par, ...args) => new Add(args.map((arg) => new Multiply(new Exp(arg), arg.diff(par))))
+    (par, ...args) => args.length === 0 ? zero :
+        args.map((arg) => new Multiply(new Exp(arg), arg.diff(par))).reduce((acc, tmp) => new Add(acc, tmp)),
+    -1
 );
-const SoftMax = makeNewOperation((...args) => Math.exp(args[0]) / sum(args.map(Math.exp)), "softmax",
-    (par, ...args) => new Divide(new Exp(args[0]), new SumExp(...args)).diff(par));
+const Softmax = makeNewOperation((...args) => Math.exp(args[0]) / sum(...args.map(Math.exp)), "softmax",
+    (par, ...args) => new Divide(new Exp(args[0]), new Sumexp(...args)).diff(par),
+    -1
+);
 
 const parser = (() => {
     const parseVariable = {
@@ -106,28 +129,15 @@ const parser = (() => {
         "z": new Variable("z")
     };
 
-    const parseOperation = {
-        "+": [Add, 2],
-        "-": [Subtract, 2],
-        "*": [Multiply, 2],
-        "/": [Divide, 2],
-        "negate": [Negate, 1],
-        "log": [Log, 2],
-        "pow": [Power, 2],
-        "exp": [Exp, 1],
-        "sumexp": [SumExp, -1],
-        "softmax": [SoftMax, -1]
-    };
-
     const parser_errors = (() => {
         const ErrorFactory = function (name) {
-            const Error = function(message) {
-                this.message = message + " in position " + pos + " : \"" + getPre() + "<HERE>" + getPost() + "\"";
+            const myError = function(message, needPos) {
+                this.message = message + (needPos ? (" in position " + pos) : '')
+                    + " : \"" + getPre() + (needPos? "<HERE>" : '') + getPost() + "\"";
+                this.name = name;
             };
-            Error.prototype = Object.create(Error.prototype);
-            Error.prototype.name = name;
-            Error.prototype.constructor = Error;
-            return Error;
+            myError.prototype = new Error;
+            return myError;
         };
         return {
             makeNewError: ErrorFactory
@@ -140,6 +150,8 @@ const parser = (() => {
     const MissingSpaceError = makeNewError("MissingSpaceError");
     const ConstantError = makeNewError("ConstantError");
     const UnexpectedSymbolError = makeNewError("UnexpectedSymbolError");
+    const InvalidArgumentsError = makeNewError("InvalidArgumentsError");
+    const EmptyInputError = makeNewError("EmptyInputError");
 
     const num = /\d/;
     let source;
@@ -147,13 +159,13 @@ const parser = (() => {
     let ch;
 
     function getPre() {
-        return source.substring(Math.max(pos - 10, 0), pos);
+        return source.substring(Math.max(pos - 17, 0), pos);
     }
     function getPost() {
-        return source.substring(pos, Math.min(pos + 10, source.length));
+        return source.substring(pos, Math.min(pos + 17, source.length));
     }
 
-    const parsePoland = function (source) {
+    function parsePoland(source) {
         let stack = [];
         for (let token of source.split(" ").filter(word => word.length > 0)) {
             if (token in parseOperation) {
@@ -166,45 +178,54 @@ const parser = (() => {
             }
         }
         return stack.pop();
-    };
+    }
 
-    const parse = function(string, mode) {
+    function parse(string, mode) {
+        // console.log(string);
         source = string;
         pos = -1;
         nextChar();
+        skipWhitespace();
+        if (test('\0')) {
+            throw new EmptyInputError("expected expression", false);
+        }
         let expr = parseArg(mode);
         skipWhitespace();
         if (!test('\0')) {
-            throw new DirtyEndOfInputError("expected end of input");
+            throw new DirtyEndOfInputError("expected end of input", true);
         }
         return expr;
-    };
+    }
 
-    const parseArg = function(mode) {
+    function parseArg(mode) {
         skipWhitespace();
         if (testNum()) { return parseConst(false); }
         if (test('-')) {
-            if (!testNum()) { throw new ConstantError("expected constant after minus"); }
+            if (!testNum()) { throw new ConstantError("expected constant after minus", true); }
             return parseConst(true);
         }
         if (ch in parseVariable) { return parseVariable[getChar()]; }
         if (test('(')) {
             let expr = parseFun(mode);
             skipWhitespace();
-            expect(')');
+            try {
+                expect(')');
+            } catch(e) {
+                throw new NoCloseBracketError(e.message, true);
+            }
             return expr;
         }
-        throw new UnexpectedSymbolError("expected expression");
-    };
+        throw new UnexpectedSymbolError("incorrect expression", true);
+    }
 
-    const parseFun = function (mode) {
+    function parseFun(mode) {
         let parsed;
         let wasWS;
         let wasInBrackets = false;
         if (mode === "prefix") {
             skipWhitespace();
             parsed = parseOperand();
-            if (parsed === undefined) { throw new UnexpectedOperandError(ch); }
+            if (parsed === undefined) { throw new UnexpectedOperandError(ch, true); }
         }
         let args = [];
         while (true) {
@@ -213,53 +234,81 @@ const parser = (() => {
             if (mode === "postfix") {
                 parsed = parseOperand();
                 if (parsed !== undefined) {
-                    if (!wasWS && !wasInBrackets) { throw new MissingSpaceError("between last argument and operand") }
+                    if (!wasWS && !wasInBrackets) { throw new MissingSpaceError("between last argument and operand", false) }  // HERE
+                    if (args.length !== parsed[1] && parsed[1] !== -1) {
+                        throw new InvalidArgumentsError("invalid number of arguments for operation " + parsed[0].prototype.op, false);  // HERE
+                    }
                     return new parsed[0](...args);
                 }
             }
-            if (mode === "prefix" && args.length === parsed[1] || testCloseBracket()) {
+            if (testCloseBracket()) {
+                if (parsed === undefined) { throw new UnexpectedOperandError("missing operand", true) }
+                if (args.length !== parsed[1] && parsed[1] !== -1) {
+                    throw new InvalidArgumentsError("invalid number of arguments for operation " + parsed[0].prototype.op, false);  // HERE
+                }
                 return new parsed[0](...args);
             }
-            const res = parseArg(mode);
+            let res;
+            try {
+                res = parseArg(mode);
+            } catch (e) {
+                if (mode === "postfix") {
+                    throw new UnexpectedOperandError("incorrect operation (or argument)", true);
+                } else {
+                    throw new InvalidArgumentsError("cannot read argument", true);
+                }
+            }
             args.push(res);
             const newInBrackets = ! (res instanceof Const || res instanceof Variable) ;
-            if (args.length > 0 || mode === "prefix") {
-                if (!wasWS && !wasInBrackets && !newInBrackets) { throw new MissingSpaceError("before argument") }
+            if (args.length > 1 || mode === "prefix") {
+                if (!wasWS && !wasInBrackets && !newInBrackets) { throw new MissingSpaceError("before argument", false) }  // HERE
             }
             wasInBrackets = newInBrackets;
         }
-    };
+    }
 
-    const parseOperand = function () {
+    function parseOperand() {
         for (let variant in parseOperation) {
+            if (variant === '-' && ch === '-') {
+                let chWas = ch;
+                let posWas = pos;
+                nextChar();
+                if (testNum()) {
+                    ch = chWas;
+                    pos = posWas;
+                    return undefined;
+                } else {
+                    return parseOperation['-'];
+                }
+            }
             if (test(variant)) {
                 return parseOperation[variant];
             }
         }
-    };
+    }
 
-    const parseConst = function (wasNegated) {
+    function parseConst(wasNegated) {
         let val = wasNegated ? "-" : "";
         while (testNum()) { val += getChar(); }
         return new Const(parseInt(val));
-    };
+    }
 
-    const nextChar = function () {
+    function nextChar() {
         if (pos + 1 === source.length) {
             ch = '\0';
         } else {
             pos++;
             ch = source[pos];
         }
-    };
+        }
 
-    const getChar = function () {
+    function getChar() {
         const res = ch;
         nextChar();
         return res;
-    };
+    }
 
-    const test = function (tested) {
+    function test(tested) {
         let posWas = pos;
         let charWas = ch;
         for (let i = 0; i < tested.length; i++) {
@@ -272,32 +321,32 @@ const parser = (() => {
             }
         }
         return true;
-    };
+    }
 
-    const testNum = function () {
+    function testNum() {
         return num.test(ch);
-    };
+    }
 
     function testCloseBracket() { return ch === ')' }
 
-    const expect = function (expected) {
+    function expect(expected) {
         for (let i = 0; i < expected.length; i++) {
             if (!test(expected[i])) {
-                throw new UnexpectedSymbolError("expected \'" + expected[i] + "\' but found " + "\'" + ch + "\'");
+                throw new UnexpectedSymbolError("expected \'" + expected[i] + "\' but found " + "\'" + ch + "\'", true);
             }
         }
-    };
+    }
 
-    const skipWhitespace = function() {
+    function skipWhitespace() {
         while (test(' ')) {
             // skip
         }
-    };
+    }
 
     return {
         parsePoland: parsePoland,
         parsePrefix: (string) => parse(string, "prefix"),
-        parsePostfix: (string) => parse(string, "postfix")
+        parsePostfix: (string) => parse(string, "postfix"),
     }
 })();
 const parse = parser.parsePoland;
@@ -305,10 +354,14 @@ const parsePrefix = parser.parsePrefix;
 const parsePostfix = parser.parsePostfix;
 
 
-// let test = new Add(new Variable('x'), new Const(2)).diff('x');
-// let test = parsePostfix("( 1 2 3 ( 2 4 *) ( 1 3 +) 4 5 6 7 ( 9 0 ysoftmax) 9 -)");
-// console.log(test.toString());
-// console.log(test);
-// console.log(test.evaluate(1, 2, 3));
+// let test = new Sumexp(new Variable('x')).diff('x');
+try {
+    let test = parsePostfix("(x y pow)");
+    console.log(test.postfix());
+    console.log(test);
+    console.log(test.evaluate(4, 2, 3));
+} catch(e) {
+    console.log(e.name + ": " + e.message);
+}
 
 // :NOTE: homework not found :(
