@@ -1,11 +1,9 @@
 ; Solution stub
 ; code for passing!
-
 ; Scalars
 (def s+ +)
 (def s- -)
 (def s* *)
-
 ; vectors
 (defn sizes-eq? [& args]
   "checks if all the vector has the same length"
@@ -62,7 +60,7 @@
   (mapv (partial scalar v) A))
 (defn v*m [v A]
   "multiplies numeric vector-string with numeric matrix"
-  {:pre [(num-vec? v) (num-mat? A) (sizes-eq? [v (A 0)])]}
+  {:pre [(num-vec? v) (num-mat? A) (sizes-eq? v (A 0))]}
   (apply v+ (mapv #(v*s %2 %1) v A)))
 (defn m*m [& matrices]
   {:pre [(every? num-mat? matrices)]
@@ -91,25 +89,25 @@
 
 ; tensors
 
-(defn consist-of-vecs-and-nums? [comp]
-  (or (number? comp)
-      (and (vector? comp) (every? consist-of-vecs-and-nums? comp))))
+(defn consist-of-vecs-and-nums? [t]
+  (or (number? t)
+      (and (vector? t) (every? consist-of-vecs-and-nums? t))))
 (defn get-shape [t]
   {:pre [(consist-of-vecs-and-nums? t)]
    :post [(or (nil? %) (num-vec? %))]}
-  "Returns vector with lengths of axis. If argument is scalar returns []. If polimeric matrix t is not vector returns nil"
+  "Returns vector with lengths of axis. If argument is scalar returns []. If polimeric matrix t is not tensor returns nil"
   (letfn [
-          (get-shape' [comp vec-to-fill]
-            (if (number? comp)
+          (get-shape' [t vec-to-fill]
+            (if (number? t)
               vec-to-fill
-              (get-shape' (comp 0) (conj vec-to-fill (count comp)))))
-          (check-shape [comp shape level]
+              (get-shape' (t 0) (conj vec-to-fill (count t)))))
+          (check-shape [t shape level]
             (if (= level (count shape))
-              (number? comp)
+              (number? t)
               (and
-                (vector? comp)
-                (= (shape level) (count comp))
-                (every? (fn [comp] (check-shape comp shape (+ 1 level))) comp))))
+                (vector? t)
+                (= (shape level) (count t))
+                (every? (fn [comp] (check-shape comp shape (+ 1 level))) t))))
           ]
     (let [res (get-shape' t [])]
       (if (check-shape t res 0) res nil))))
@@ -122,10 +120,10 @@
     {:pre [(every? tensor? tensors) (apply = (mapv get-shape tensors))]
      :post [(tensor? %)]}
     (apply
-      (fn rec-fun [& comps]
-        (if (every? number? comps)
-          (apply op-end-of-rec comps)
-          (apply mapv rec-fun comps)))
+      (fn rec-fun [& ts]
+        (if (every? number? ts)
+          (apply op-end-of-rec ts)
+          (apply mapv rec-fun ts)))
       tensors)))
 (def t+ (ten-op +))
 (def t- (ten-op -))
