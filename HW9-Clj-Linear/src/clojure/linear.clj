@@ -56,7 +56,7 @@
   {:pre [(num-mat? A) (every? number? scalars)]}
   (let [prod (apply * scalars)] (mapv #(v*s % prod) A)))
 (defn m*v [A v]
-  {:pre [(num-mat? A) (num-vec? v) (sizes-eq? [(count (A 0)) v])]}
+  {:pre [(num-mat? A) (num-vec? v) (sizes-eq? (A 0) v)]}
   (mapv (partial scalar v) A))
 (defn v*m [v A]
   "multiplies numeric vector-string with numeric matrix"
@@ -95,7 +95,8 @@
 (defn get-shape [t]
   {:pre [(consist-of-vecs-and-nums? t)]
    :post [(or (nil? %) (num-vec? %))]}
-  "Returns vector with lengths of axis. If argument is scalar returns []. If polimeric matrix t is not tensor returns nil"
+  "Returns vector with lengths of axis. If argument is scalar returns [].
+   If polimeric matrix t is not tensor returns nil"
   (letfn [
           (get-shape' [t vec-to-fill]
             (if (number? t)
@@ -157,13 +158,4 @@
   )
 
 (println (str "A = " A))
-(println (str "det A = " (det A)))                          ; -911034352
-
-;(println (scalar [60 80 90] [1 2 3]))
-;(def vectors [[60 80 90] [1 2 3] [100 100 0]])
-;(println (apply v* [[60 80 90] [1 2 3] [100 100 0]]))
-;(println (m- [[2 0] [-3 45] [900 -12]] [[54 2] [7 -0] [+0 34]] [[43 34] [1 -1] [29 8]]))
-;(println (m*s [[2 0] [-3 45] [900 -12]] 1 2 -30))
-;(println (m*v [[2 0] [-3 45] [900 -12] [21 0]] [2 -1 0 1]))
-;(println (m*m [[1 0] [0 1]] [[13 -900] [0 1345]] [[1 0] [0 1]]))
-;(println (transpose [[1 2] [3 4] [5 6] [7 8]]))
+(println (str "det A = " (det A)))
